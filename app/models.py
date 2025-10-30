@@ -95,3 +95,5 @@ class ReceiptExtractionLog(db.Model):
     processed_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     raw_payload: Mapped[str | None]
     status: Mapped[str] = mapped_column(default="pending")
+    image_prediction: Mapped[str | None] = mapped_column()
+    image_confidence: Mapped[float | None] = mapped_column()

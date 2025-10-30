@@ -31,7 +31,11 @@
               <div class="calendar-cell__header">
                 <span class="day-number">{{ cell.day }}</span>
                 {% if holidays.get(cell.date) %}
-                  <span class="holiday">{{ holidays[cell.date].name }}</span>
+                  <ul class="holiday-list">
+                    {% for label in holidays[cell.date] %}
+                      <li class="holiday-badge">{{ label }}</li>
+                    {% endfor %}
+                  </ul>
                 {% endif %}
               </div>
               <ul class="calendar-entries">

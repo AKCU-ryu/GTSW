@@ -1,6 +1,7 @@
 """Route handlers for the group expense tracker."""
 from __future__ import annotations
 
+from collections import defaultdict
 from datetime import date
 import json
 from typing import Iterable
@@ -20,6 +21,7 @@ from . import db
 from .models import EntryShare, Holiday, LedgerEntry, Member, ReceiptExtractionLog
 from .services.calendar import build_month_matrix
 from .services.receipt_ai import extract_receipt_information
+from .services.receipt_ml import ReceiptModelNotReady, predict_image_bytes
 from .services.summary import (
     calculate_member_balances,
     calculate_monthly_totals,
@@ -90,7 +92,12 @@ def main_index() -> str:
     member_balances = calculate_member_balances(selected_year, selected_month)
 
     month_matrix = build_month_matrix(selected_year, selected_month, month_entries)
-    holidays = {holiday.observed_on: holiday for holiday in Holiday.query.all()}
+    holidays: dict[date, list[str]] = defaultdict(list)
+    for holiday in Holiday.query.order_by(Holiday.observed_on).all():
+        for label in (holiday.name or "").split("/"):
+            clean = label.strip()
+            if clean:
+                holidays[holiday.observed_on].append(clean)
 
     return render_template(
         "main_index.html",
@@ -136,7 +143,12 @@ def member_index(member_id: int) -> str:
         .all()
     )
     month_matrix = build_month_matrix(selected_year, selected_month, month_entries)
-    holidays = {holiday.observed_on: holiday for holiday in Holiday.query.all()}
+    holidays: dict[date, list[str]] = defaultdict(list)
+    for holiday in Holiday.query.order_by(Holiday.observed_on).all():
+        for label in (holiday.name or "").split("/"):
+            clean = label.strip()
+            if clean:
+                holidays[holiday.observed_on].append(clean)
 
     return render_template(
         "member_index.html",
@@ -242,14 +254,17 @@ def create_entry() -> Response:
 @bp.route("/api/holidays")
 def holiday_feed() -> Response:
     """Return holiday data in JSON for the calendar widget."""
-    items = [
-        {
-            "name": holiday.name,
-            "date": holiday.observed_on.isoformat(),
-            "source": holiday.source,
-        }
-        for holiday in Holiday.query.order_by(Holiday.observed_on).all()
-    ]
+    items = []
+    for holiday in Holiday.query.order_by(Holiday.observed_on).all():
+        labels = [part.strip() for part in (holiday.name or "").split("/") if part.strip()]
+        items.append(
+            {
+                "name": holiday.name,
+                "labels": labels,
+                "date": holiday.observed_on.isoformat(),
+                "source": holiday.source,
+            }
+        )
     return jsonify(items)
 
 
@@ -261,34 +276,72 @@ def analyze_receipt() -> Response:
     learning pipeline. Here we accept either plain text or JSON payloads to keep the
     example self contained while still demonstrating the integration points.
     """
+    image_prediction = None
+    image_error: str | None = None
+
     if request.content_type == "application/json":
         payload = request.get_json(force=True)
         content = payload.get("content", "")
         filename = payload.get("filename")
     else:
         uploaded_file = request.files.get("file")
-        content = uploaded_file.read().decode("utf-8", errors="ignore") if uploaded_file else ""
         filename = uploaded_file.filename if uploaded_file else None
+        if uploaded_file:
+            file_bytes = uploaded_file.read()
+            mimetype = uploaded_file.mimetype or ""
+            if mimetype.startswith("image/"):
+                try:
+                    image_prediction = predict_image_bytes(file_bytes, filename=filename)
+                except ReceiptModelNotReady as exc:
+                    image_error = str(exc)
+                content = ""
+            else:
+                content = file_bytes.decode("utf-8", errors="ignore")
+        else:
+            content = ""
 
     extraction = extract_receipt_information(content)
+    detected_store = extraction.store_name or (
+        image_prediction.label if image_prediction else None
+    )
+
+    status = "success" if extraction.total else "needs_review"
+    if image_error:
+        status = "needs_review"
 
     log = ReceiptExtractionLog(
         uploaded_filename=filename,
         detected_total=extraction.total,
-        detected_store=extraction.store_name,
+        detected_store=detected_store,
         detected_card=extraction.card,
-        raw_payload=json.dumps({"content": content[:500]}),
-        status="success" if extraction.total else "needs_review",
+        image_prediction=image_prediction.label if image_prediction else None,
+        image_confidence=image_prediction.confidence if image_prediction else None,
+        raw_payload=json.dumps(
+            {
+                "content": content[:500],
+                "image_prediction": image_prediction.label if image_prediction else None,
+                "image_confidence": image_prediction.confidence if image_prediction else None,
+                "image_error": image_error,
+            }
+        ),
+        status=status,
     )
     db.session.add(log)
     db.session.commit()
 
     response_payload = {
         "total": extraction.total,
-        "store": extraction.store_name,
+        "store": detected_store,
         "card": extraction.card,
         "timestamp": extraction.timestamp.isoformat(),
         "items": extraction.items,
+        "image_prediction": {
+            "label": image_prediction.label,
+            "confidence": image_prediction.confidence,
+        }
+        if image_prediction
+        else None,
+        "image_error": image_error,
     }
     return jsonify(response_payload)
 

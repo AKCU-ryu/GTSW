@@ -141,7 +141,11 @@
           `.calendar-cell[data-date="${holiday.date}"]`
         );
         if (cell) {
-          cell.setAttribute('title', `${holiday.name} (${holiday.source})`);
+          const labels = Array.isArray(holiday.labels) && holiday.labels.length
+            ? holiday.labels.join(', ')
+            : holiday.name;
+          const source = holiday.source ? ` (${holiday.source})` : '';
+          cell.setAttribute('title', `${labels}${source}`);
         }
       });
     })
