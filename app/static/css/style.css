@@ -1,0 +1,456 @@
+:root {
+  --background: #f8f5f0;
+  --foreground: #1f1f24;
+  --accent: #5a6acf;
+  --accent-muted: #cdd3ff;
+  --card: rgba(255, 255, 255, 0.92);
+  --border: #d8d6d2;
+  --shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+  --font-family: 'Noto Sans KR', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+[data-theme='dark'] {
+  --background: #101018;
+  --foreground: #f2f2f5;
+  --accent: #6daef5;
+  --accent-muted: rgba(109, 174, 245, 0.25);
+  --card: rgba(24, 26, 36, 0.95);
+  --border: rgba(255, 255, 255, 0.12);
+  --shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-family);
+  background: var(--background);
+  color: var(--foreground);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+}
+
+.app-shell {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  grid-template-rows: auto 1fr;
+  width: min(1200px, 100%);
+  min-height: 100vh;
+  background: var(--background);
+}
+
+.top-bar {
+  grid-column: 1 / span 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 2rem 1rem;
+  position: sticky;
+  top: 0;
+  background: var(--background);
+  z-index: 10;
+}
+
+.app-logo {
+  font-size: 1.6rem;
+  margin: 0;
+}
+
+.top-nav {
+  display: flex;
+  gap: 1rem;
+}
+
+.nav-link {
+  text-decoration: none;
+  color: var(--foreground);
+  padding: 0.5rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  transition: 0.2s ease;
+}
+
+.nav-link:hover,
+.nav-link:focus {
+  border-color: var(--accent);
+  background: var(--accent-muted);
+}
+
+.side-index {
+  padding: 1rem 1.5rem;
+  border-right: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(12px);
+}
+
+.side-title {
+  margin-top: 0;
+  font-size: 1.1rem;
+}
+
+.member-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.member-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.4rem 0.5rem;
+  border-radius: 0.6rem;
+  background: var(--card);
+  box-shadow: var(--shadow);
+}
+
+.member-buttons {
+  display: flex;
+  gap: 0.2rem;
+  margin: 0 0.4rem;
+}
+
+.member-item.inactive {
+  opacity: 0.5;
+}
+
+.member-link {
+  text-decoration: none;
+  color: inherit;
+  flex: 1;
+}
+
+.inline-form {
+  margin: 0 0 0 0.6rem;
+}
+
+.index-button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 1.2rem;
+  padding: 0.2rem 0.4rem;
+}
+
+.member-empty {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.content {
+  padding: 1rem 2rem 3rem;
+  overflow-y: auto;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.calendar {
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.calendar-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.calendar-cell {
+  background: var(--card);
+  border: 1px solid var(--border);
+  min-height: 120px;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.calendar-cell.empty {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.calendar-header .calendar-cell {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.calendar-day {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.4rem;
+}
+
+.day-number {
+  font-weight: 700;
+}
+
+.holiday {
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.calendar-entries {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.3rem;
+}
+
+.calendar-entries li {
+  font-size: 0.8rem;
+  display: flex;
+  justify-content: space-between;
+  padding: 0.35rem 0.4rem;
+  border-radius: 0.5rem;
+  background: rgba(90, 106, 207, 0.08);
+}
+
+.calendar-entries li.expense {
+  background: rgba(233, 104, 104, 0.15);
+}
+
+.ledger-section,
+.summary-section {
+  margin-top: 2rem;
+}
+
+.ledger-table,
+.mini-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--card);
+  border-radius: 0.8rem;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.ledger-table th,
+.ledger-table td,
+.mini-table th,
+.mini-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.ledger-table thead {
+  background: var(--accent-muted);
+}
+
+.align-right {
+  text-align: right;
+}
+
+.empty {
+  text-align: center;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.summary-section {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.summary-card {
+  background: var(--card);
+  padding: 1.5rem;
+  border-radius: 1rem;
+  box-shadow: var(--shadow);
+}
+
+.flash-messages {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.flash {
+  padding: 0.75rem 1rem;
+  border-radius: 0.7rem;
+  background: var(--accent-muted);
+  color: var(--foreground);
+  box-shadow: var(--shadow);
+}
+
+.flash.error {
+  background: rgba(233, 104, 104, 0.35);
+}
+
+.action-button,
+.submit,
+.settings-form button,
+.month-picker button {
+  background: var(--accent);
+  border: none;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: transform 0.2s ease;
+}
+
+.action-button:hover,
+.submit:hover,
+.settings-form button:hover,
+.month-picker button:hover {
+  transform: translateY(-1px);
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.25);
+  display: grid;
+  place-items: center;
+  z-index: 100;
+}
+
+.modal-content {
+  background: var(--card);
+  padding: 2rem;
+  border-radius: 1rem;
+  width: min(420px, 90%);
+  box-shadow: var(--shadow);
+  position: relative;
+}
+
+.modal-title {
+  margin-top: 0;
+}
+
+.modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.entry-form {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.entry-form label,
+.settings-form label,
+.theme-form label {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.95rem;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.split-members {
+  display: grid;
+  gap: 0.4rem;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  padding-top: 0.4rem;
+}
+
+.settings-panel {
+  position: fixed;
+  right: 1.5rem;
+  bottom: 1.5rem;
+}
+
+.settings-toggle {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
+  background: var(--accent);
+  color: white;
+  font-size: 1.6rem;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+}
+
+.settings-content {
+  position: absolute;
+  right: 0;
+  bottom: 70px;
+  width: 280px;
+  background: var(--card);
+  border-radius: 1rem;
+  padding: 1.2rem;
+  box-shadow: var(--shadow);
+}
+
+.settings-hint {
+  font-size: 0.8rem;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.member-ledger {
+  background: var(--card);
+  padding: 1.5rem;
+  border-radius: 1rem;
+  box-shadow: var(--shadow);
+}
+
+.member-meta {
+  margin: 0;
+  color: rgba(0, 0, 0, 0.7);
+}
+
+@media (max-width: 960px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .side-index {
+    grid-row: 3;
+    display: flex;
+    overflow-x: auto;
+    gap: 0.5rem;
+  }
+
+  .member-list {
+    flex-direction: row;
+  }
+
+  .member-item {
+    min-width: 140px;
+  }
+}
+
+@media (max-width: 600px) {
+  .top-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.8rem;
+  }
+
+  .content {
+    padding: 1rem;
+  }
+
+  .calendar-cell {
+    min-height: 90px;
+  }
+}

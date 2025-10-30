@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}{{ member.display_name() }} 가계부{% endblock %}
+
+{% block content %}
+<section class="member-ledger">
+  <header class="section-header">
+    <h2>{{ member.display_name() }}님의 가계부</h2>
+    <p class="member-meta">
+      이메일: {{ member.email or '미등록' }} · 상태: {{ '활성' if member.is_active else '잠금' }}
+    </p>
+  </header>
+  <table class="ledger-table">
+    <thead>
+      <tr>
+        <th>날짜</th>
+        <th>구분</th>
+        <th>항목</th>
+        <th>금액</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for entry in entries %}
+        <tr>
+          <td>{{ entry.occurred_on.strftime('%Y-%m-%d') }}</td>
+          <td>{{ '입금' if entry.entry_type == 'income' else '출금' }}</td>
+          <td>{{ entry.category }}</td>
+          <td class="align-right">₩{{ '{:,.0f}'.format(entry.amount) }}</td>
+        </tr>
+      {% else %}
+        <tr><td colspan="4" class="empty">등록된 내역이 없습니다.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

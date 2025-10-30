@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}공동 가계부{% endblock %}</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="top-bar">
+        <h1 class="app-logo">다이어리 가계부</h1>
+        <nav class="top-nav">
+          <a href="{{ url_for('main.dashboard') }}" class="nav-link">메인</a>
+          <a href="#income" class="nav-link">입금내역</a>
+          <a href="#expense" class="nav-link">출금내역</a>
+        </nav>
+      </header>
+
+      <aside class="side-index">
+        <h2 class="side-title">멤버</h2>
+        <ul class="member-list">
+          {% for member in members %}
+            <li class="member-item {{ 'inactive' if not member.is_active }}">
+              <a class="member-link" href="{{ url_for('main.member_detail', member_id=member.id) }}">{{ member.display_name() }}</a>
+              <div class="member-buttons">
+                <button type="button" class="index-button filter-button" data-member-id="{{ member.id }}" data-target="#income">입</button>
+                <button type="button" class="index-button filter-button" data-member-id="{{ member.id }}" data-target="#expense">출</button>
+              </div>
+              <form method="post" action="{{ url_for('main.toggle_member', member_id=member.id) }}" class="inline-form">
+                <button type="submit" class="index-button">{{ '🔓' if member.is_active else '🔒' }}</button>
+              </form>
+            </li>
+          {% else %}
+            <li class="member-empty">등록된 멤버가 없습니다.</li>
+          {% endfor %}
+        </ul>
+      </aside>
+
+      <main class="content">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <ul class="flash-messages">
+              {% for category, message in messages %}
+                <li class="flash {{ category }}">{{ message }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+      </main>
+
+      <div class="settings-panel">
+        <button class="settings-toggle" type="button" aria-expanded="false">⚙️</button>
+        <section class="settings-content" hidden>
+          <h2>설정</h2>
+          <form class="theme-form">
+            <label>테마
+              <select name="theme">
+                <option value="light">라이트</option>
+                <option value="dark">다크</option>
+              </select>
+            </label>
+            <label>폰트 크기
+              <input type="range" name="fontSize" min="14" max="22" value="16" />
+            </label>
+          </form>
+
+          <form method="post" action="{{ url_for('main.add_member') }}" class="settings-form">
+            <h3>멤버 추가</h3>
+            <label>이름*<input type="text" name="name" required /></label>
+            <label>별명<input type="text" name="nickname" /></label>
+            <label>이메일<input type="email" name="email" /></label>
+            <label class="checkbox">
+              <input type="checkbox" name="is_admin" /> 고정지출 멤버(총무)
+            </label>
+            <button type="submit">추가</button>
+          </form>
+
+          <p class="settings-hint">시스템 모드, 글꼴, 초대 이메일 전송 등을 설정할 수 있습니다.</p>
+        </section>
+      </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/main.js') }}" defer></script>
+  </body>
+</html>
