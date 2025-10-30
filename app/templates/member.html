@@ -1,21 +1,32 @@
-{% extends 'base.html' %}
+{% extends 'shell.html' %}
 {% block title %}{{ member.display_name() }} 가계부{% endblock %}
 
 {% block content %}
+<section class="member-hero">
+  <div>
+    <h2>{{ member.display_name() }}님의 가계부</h2>
+    <p>총무와 본인만 수정 가능합니다. 우측 인덱스로 개인 달력을 관리하세요.</p>
+  </div>
+  <div class="member-meta">
+    <p><span>이메일</span> {{ member.email or '등록되지 않음' }}</p>
+    <p><span>상태</span> {{ '활성' if member.is_active else '잠금' }}</p>
+  </div>
+  <a class="index-button" href="{{ url_for('main.member_index', member_id=member.id) }}">개인 인덱스</a>
+</section>
+
 <section class="member-ledger">
   <header class="section-header">
-    <h2>{{ member.display_name() }}님의 가계부</h2>
-    <p class="member-meta">
-      이메일: {{ member.email or '미등록' }} · 상태: {{ '활성' if member.is_active else '잠금' }}
-    </p>
+    <h3>거래 내역</h3>
+    <button type="button" class="action-button" data-modal-target="#entry-modal" data-entry-type="expense">내역 추가</button>
   </header>
   <table class="ledger-table">
     <thead>
       <tr>
         <th>날짜</th>
-        <th>구분</th>
-        <th>항목</th>
+        <th>유형</th>
+        <th>카테고리</th>
         <th>금액</th>
+        <th>설명</th>
       </tr>
     </thead>
     <tbody>
@@ -25,11 +36,14 @@
           <td>{{ '입금' if entry.entry_type == 'income' else '출금' }}</td>
           <td>{{ entry.category }}</td>
           <td class="align-right">₩{{ '{:,.0f}'.format(entry.amount) }}</td>
+          <td>{{ entry.description or '-' }}</td>
         </tr>
       {% else %}
-        <tr><td colspan="4" class="empty">등록된 내역이 없습니다.</td></tr>
+        <tr><td colspan="5" class="empty">등록된 내역이 없습니다.</td></tr>
       {% endfor %}
     </tbody>
   </table>
 </section>
+
+{% include 'partials/entry_modal.html' %}
 {% endblock %}

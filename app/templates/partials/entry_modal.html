@@ -1,0 +1,34 @@
+<div class="modal" id="entry-modal" hidden>
+  <div class="modal-content">
+    <button type="button" class="modal-close" aria-label="닫기">×</button>
+    <form method="post" action="{{ url_for('main.create_entry') }}" class="entry-form">
+      <h3 class="modal-title">내역 추가</h3>
+      <input type="hidden" name="entry_type" value="expense" />
+      <label>금액*<input type="number" name="amount" min="0" step="0.01" required /></label>
+      <label>카테고리<input type="text" name="category" placeholder="점심, 커피 등" /></label>
+      <label>설명<input type="text" name="description" placeholder="세부 메모" /></label>
+      <label>발생일<input type="date" name="occurred_on" value="{{ date.today().isoformat() }}" /></label>
+      <label>책임 멤버
+        <select name="member_id">
+          <option value="">-- 선택 --</option>
+          {% for member in members %}
+            <option value="{{ member.id }}">{{ member.display_name() }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <fieldset>
+        <legend>1/N 분배</legend>
+        <label class="checkbox"><input type="checkbox" name="split_evenly" /> 멤버 균등 분배</label>
+        <div class="split-members">
+          {% for member in members %}
+            <label class="checkbox">
+              <input type="checkbox" name="split_members" value="{{ member.id }}" checked />
+              {{ member.display_name() }}
+            </label>
+          {% endfor %}
+        </div>
+      </fieldset>
+      <button type="submit" class="submit">저장</button>
+    </form>
+  </div>
+</div>

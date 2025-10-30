@@ -35,13 +35,49 @@ def inject_members() -> dict[str, Iterable[Member]]:
     return {"members": Member.query.order_by(Member.name).all()}
 
 
-@bp.route("/")
-def dashboard() -> str:
-    """Render the treasurer dashboard with summaries and calendar."""
+def _resolve_month_and_year() -> tuple[int, int]:
     today = date.today()
     selected_month = request.args.get("month", type=int, default=today.month)
     selected_year = request.args.get("year", type=int, default=today.year)
+    return selected_year, selected_month
 
+
+@bp.route("/")
+def landing() -> str:
+    """Cover page with login and registration prompts."""
+    return render_template("main.html")
+
+
+@bp.route("/admin")
+def admin_base() -> str:
+    """Treasurer overview page with quick stats."""
+    selected_year, selected_month = _resolve_month_and_year()
+    month_query = (
+        LedgerEntry.query.filter(
+            db.extract("year", LedgerEntry.occurred_on) == selected_year,
+            db.extract("month", LedgerEntry.occurred_on) == selected_month,
+        )
+        .order_by(LedgerEntry.occurred_on.desc())
+    )
+
+    month_entries = month_query.all()
+    latest_entries = month_entries[:6]
+    monthly_totals = calculate_monthly_totals(month_entries)
+    member_balances = calculate_member_balances(selected_year, selected_month)
+
+    return render_template(
+        "base.html",
+        monthly_totals=monthly_totals,
+        member_balances=member_balances,
+        latest_entries=latest_entries,
+        date=date,
+    )
+
+
+@bp.route("/main/index")
+def main_index() -> str:
+    """Render the main calendar index with all ledger data."""
+    selected_year, selected_month = _resolve_month_and_year()
     month_entries = LedgerEntry.query.filter(
         db.extract("year", LedgerEntry.occurred_on) == selected_year,
         db.extract("month", LedgerEntry.occurred_on) == selected_month,
@@ -57,7 +93,7 @@ def dashboard() -> str:
     holidays = {holiday.observed_on: holiday for holiday in Holiday.query.all()}
 
     return render_template(
-        "index.html",
+        "main_index.html",
         month=selected_month,
         year=selected_year,
         incomes=incomes,
@@ -70,6 +106,12 @@ def dashboard() -> str:
     )
 
 
+@bp.route("/members/overview")
+def member_overview() -> str:
+    """Overview listing for members with quick access buttons."""
+    return render_template("member_overview.html")
+
+
 @bp.route("/members/<int:member_id>")
 def member_detail(member_id: int) -> str:
     """Show a member specific ledger page."""
@@ -79,7 +121,32 @@ def member_detail(member_id: int) -> str:
         .order_by(LedgerEntry.occurred_on.desc())
         .all()
     )
-    return render_template("member.html", member=member, entries=entries)
+    return render_template("member.html", member=member, entries=entries, date=date)
+
+
+@bp.route("/members/<int:member_id>/index")
+def member_index(member_id: int) -> str:
+    """Calendar style index for a single member."""
+    selected_year, selected_month = _resolve_month_and_year()
+    member = Member.query.get_or_404(member_id)
+    month_entries = (
+        LedgerEntry.query.filter_by(member_id=member.id)
+        .filter(db.extract("year", LedgerEntry.occurred_on) == selected_year)
+        .filter(db.extract("month", LedgerEntry.occurred_on) == selected_month)
+        .all()
+    )
+    month_matrix = build_month_matrix(selected_year, selected_month, month_entries)
+    holidays = {holiday.observed_on: holiday for holiday in Holiday.query.all()}
+
+    return render_template(
+        "member_index.html",
+        member=member,
+        month=selected_month,
+        year=selected_year,
+        month_matrix=month_matrix,
+        holidays=holidays,
+        date=date,
+    )
 
 
 @bp.route("/members", methods=["POST"])
@@ -98,7 +165,7 @@ def add_member() -> Response:
 
     if not name:
         flash("멤버 이름은 필수입니다.", "error")
-        return redirect(request.referrer or url_for("main.dashboard"))
+        return redirect(request.referrer or url_for("main.main_index"))
 
     member = Member(name=name, nickname=nickname, email=email, is_admin=is_admin)
     db.session.add(member)
@@ -107,7 +174,7 @@ def add_member() -> Response:
     if email:
         flash(f"{name}님에게 초대장이 이메일({email})로 발송됩니다.", "info")
     flash(f"새 멤버 {member.display_name()}가 추가되었습니다.", "success")
-    return redirect(request.referrer or url_for("main.dashboard"))
+    return redirect(request.referrer or url_for("main.member_overview"))
 
 
 @bp.route("/members/<int:member_id>/toggle", methods=["POST"])
@@ -120,7 +187,7 @@ def toggle_member(member_id: int) -> Response:
         f"{member.display_name()} 상태가 {'활성화' if member.is_active else '잠금'}으로 변경되었습니다.",
         "info",
     )
-    return redirect(request.referrer or url_for("main.dashboard"))
+    return redirect(request.referrer or url_for("main.member_overview"))
 
 
 @bp.route("/ledger", methods=["POST"])
@@ -130,7 +197,7 @@ def create_entry() -> Response:
     amount = request.form.get("amount", type=float)
     if amount is None or amount < 0:
         flash("금액을 올바르게 입력해주세요.", "error")
-        return redirect(request.referrer or url_for("main.dashboard"))
+        return redirect(request.referrer or url_for("main.main_index"))
 
     member_id = request.form.get("member_id", type=int)
     created_by_id = request.form.get("created_by_id", type=int)
@@ -169,7 +236,7 @@ def create_entry() -> Response:
 
     db.session.commit()
     flash("새로운 가계부 내역이 추가되었습니다.", "success")
-    return redirect(request.referrer or url_for("main.dashboard"))
+    return redirect(request.referrer or url_for("main.main_index"))
 
 
 @bp.route("/api/holidays")
@@ -226,7 +293,25 @@ def analyze_receipt() -> Response:
     return jsonify(response_payload)
 
 
-def register_blueprints(app):
+@bp.route("/api/receipt/<int:log_id>")
+def receipt_log_detail(log_id: int) -> Response:
+    """Expose stored receipt extraction results."""
+    log = ReceiptExtractionLog.query.get_or_404(log_id)
+    payload = json.loads(log.raw_payload) if log.raw_payload else None
+    return jsonify(
+        {
+            "filename": log.uploaded_filename,
+            "total": log.detected_total,
+            "store": log.detected_store,
+            "card": log.detected_card,
+            "status": log.status,
+            "processed_at": log.processed_at.isoformat(),
+            "raw_payload": payload,
+        }
+    )
+
+
+def register_blueprints(app) -> None:
     """Convenience helper for unit tests to register blueprints."""
     app.register_blueprint(bp)
 

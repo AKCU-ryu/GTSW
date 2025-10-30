@@ -44,6 +44,9 @@
       const expanded = settingsToggle.getAttribute('aria-expanded') === 'true';
       settingsToggle.setAttribute('aria-expanded', String(!expanded));
       settingsContent.hidden = expanded;
+      if (!expanded) {
+        settingsContent.focus?.();
+      }
     });
   }
 
@@ -111,6 +114,23 @@
       });
     });
   }
+
+  const dayButtons = document.querySelectorAll('.day-index');
+  let highlightedCell = null;
+  dayButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      const day = button.dataset.day;
+      if (!day) return;
+      const cell = document.querySelector(`.calendar-cell[data-date$='-${day}']`);
+      if (!cell) return;
+      if (highlightedCell) {
+        highlightedCell.classList.remove('is-highlighted');
+      }
+      cell.classList.add('is-highlighted');
+      highlightedCell = cell;
+      cell.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  });
 
   // Fetch holidays to display tooltip like interactions.
   fetch('/api/holidays')
