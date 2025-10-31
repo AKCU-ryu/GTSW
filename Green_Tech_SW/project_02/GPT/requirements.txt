@@ -1,0 +1,13 @@
+# requirements.txt
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+python-dotenv==1.0.1
+pandas==2.2.2
+numpy==1.26.4
+scikit-learn==1.5.2
+yfinance==0.2.43       # 예시 데이터 수집(모의)
+ta==0.11.0             # RSI 등 기술지표
+# 추후 교체용(키움/Qt):
+PyQt5==5.15.11
+pykiwoom==0.3.2
+requests==2.32.3

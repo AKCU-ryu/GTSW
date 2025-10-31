@@ -1,0 +1,14 @@
+/* app/web/styles.css */
+:root{ --brand:#06f; --ink:#111; --bg:#f6f7fb; --card:#fff; --line:#e9ecef; }
+*{ box-sizing:border-box; }
+body{ margin:0; font:14px/1.5 system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans KR", sans-serif; color:var(--ink); background:var(--bg); }
+.topbar{ position:sticky; top:0; backdrop-filter:saturate(180%) blur(8px); background:rgba(255,255,255,.8); border-bottom:1px solid var(--line); padding:12px 20px; }
+.brand{ font-weight:700; color:var(--brand); }
+.container{ max-width:880px; margin:24px auto; padding:0 16px; display:grid; gap:16px; }
+.card{ background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px; box-shadow:0 1px 1px rgba(0,0,0,.03); }
+.card h2{ margin:0 0 12px; font-size:16px; }
+.row{ display:flex; gap:8px; align-items:center; }
+input, select, button{ height:36px; border-radius:10px; border:1px solid var(--line); padding:0 10px; }
+button{ background:var(--brand); color:#fff; border:none; cursor:pointer; font-weight:600; }
+button:hover{ filter:brightness(.95); }
+.pre{ background:#0f172a; color:#e2e8f0; border-radius:10px; padding:10px; overflow:auto; min-height:60px; }

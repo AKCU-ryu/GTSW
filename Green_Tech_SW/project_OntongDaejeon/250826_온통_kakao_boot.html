@@ -1,0 +1,116 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
+            integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
+            crossorigin="anonymous"></script>
+    <style>
+       #content p {margin: 6px 0px; padding: 8px 10px; background-color: azure;
+                   border-radius: 6px; border:  1px solid black;}
+    </style>
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <!-- PapaParse CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    
+    <script>
+        $(document).ready(function(){
+            // jquery $.ajax, $.get, $.post 는 비동기적으로 데이터를 주고 받을 수 있음.
+            // 요청 데이터, 응답 데이터, 처리방법, 오류처리 or 동기처리 등 세밀하게 설정가능
+            let REST_API_KEY ="c880ae1ea158c88777800853dd955c83";
+            $('#btn').click(function(){
+                // let query = "";  // 입력 검색어로
+                let query = $("#userInput").val('');
+                $("userInput").val('');
+                $.ajax({
+                     url : "https://dapi.kakao.com/v2/search/web"
+                    ,method : "GET"
+                    ,dataType :"json"  // 응답 데이터 타입
+                    ,data: {"query": query
+                            ,"page":1
+                            ,"size":20 
+                    },headers:{"Authorization": `KakaoAK ${REST_API_KEY}`}
+                    ,success : function(res){
+                        let arr = res['documents'];
+                        // 배열 반목문
+                        // 반복마다 content에 append
+                        arr.forEach((element, idx) => {
+                            console.log(idx);
+                            $("#content").append(`<a href="${element.url}"><p>${element.title}</p></a>`);
+                        });
+                    }
+                    ,error: function(e){
+                        console.log(e);
+                    }    
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+    <!-- ================================================================ -->
+    <div url=""></div>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-1"></div>
+            <div class="col">
+                <nav class="navbar bg-body-tertiary">
+                    <div class="container-fluid">
+                        <form class="d-flex" role="search">
+                            <input id="userInput" class="form-control me-2" type="search" placeholder="Search" aria-label="Search" />
+                            <button id="btn" class="btn btn-outline-success" type="button">검색</button>
+                        </form>
+                    </div>
+                </nav>
+            </div>
+        </div>
+        <div class="row">
+        <div class="col-1"></div>
+        <div class="col">
+            <div class="accordion" id="content">
+                <!-- 아코디언 버튼 클릭시 내용이 보이도록 하려면 id를 맞춰줘야 함 -->
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                            제목
+                        </button>
+                    </h2>
+                    <div id="collapseOne" class="accordion-collapse collapse"
+                            data-bs-parent="#accordionExample">
+                            <div class="accordion-body">
+                            내용
+                        </div>
+                    </div>
+                    </div>
+                <!-- -->
+            </div>
+        </div>
+    <!-- ================================================================ -->
+</body>
+<script>
+    let title = ''
+    let content = ''
+    let idx = 1;
+    let temp = `<div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                            <!-- data-bs-target= "#collapseOne"--> "#${idx}" aria-expanded="true" aria-controls="${idx}">
+                            ${element.url}
+                        <!-- </button>
+                    </h2>
+                    <div id="kakao${idx}" class="accordion-collapse collapse"
+                        data-bs-parent="#accordionExample">
+                        <div class="accordion-body">
+                        ${content}
+                        </div >
+                    </div >
+                </div >`;
+                $("#content").append(temp);
+</script>
+</html>

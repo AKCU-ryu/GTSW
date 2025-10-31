@@ -1,0 +1,26 @@
+{% extends 'shell.html' %}
+{% block title %}멤버 페이지{% endblock %}
+
+{% block content %}
+<section class="member-overview">
+  <header class="section-header">
+    <h2>멤버 페이지</h2>
+    <p>멤버별 가계부와 인덱스를 빠르게 확인하세요.</p>
+  </header>
+  <div class="member-card-grid">
+    {% for member in members %}
+      <article class="member-card">
+        <h3>{{ member.display_name() }}</h3>
+        <p class="muted">{{ member.email or '이메일 미등록' }}</p>
+        <div class="button-row">
+          <a class="index-button" href="{{ url_for('main.member_detail', member_id=member.id) }}">가계부</a>
+          <a class="index-button" href="{{ url_for('main.member_index', member_id=member.id) }}">인덱스</a>
+        </div>
+        <p class="status">상태: {{ '활성' if member.is_active else '잠금' }}</p>
+      </article>
+    {% else %}
+      <p class="muted">등록된 멤버가 없습니다.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

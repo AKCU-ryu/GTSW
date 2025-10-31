@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+    
+<input type="file" id="csvFile" accept=".csv" />
+<div id="output"></div>
+
+<!-- PapaParse CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+
+<script>
+document.getElementById("csvFile").addEventListener("change", function (e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  Papa.parse(file, {
+    header: true,         // 첫 행을 컬럼명으로 사용
+    skipEmptyLines: true, // 빈 줄 무시
+    encoding: "euc-kr",   // ANSI
+  complete: function (results) {
+    const data = results.data; // JSON 배열 형태
+  console.log(data);
+
+  // 테이블로 출력
+  let html = "<table border='1' cellspacing='0' cellpadding='5'>";
+  html += "<tr>";
+  Object.keys(data[0]).forEach(col => {
+    html += "<th>" + col + "</th>";
+  });
+  html += "</tr>";
+
+  data.forEach(row => {
+    html += "<tr>";
+  Object.values(row).forEach(val => {
+    html += "<td>" + (val || "") + "</td>";
+  });
+    html += "</tr>";
+  });
+
+    html += "</table>";
+  document.getElementById("output").innerHTML = html;
+  }
+  });
+});
+</script>
+
+<script>
+// forEach, map, filter, find, some, every
+// forEach 배열의 각 요소에 대한 지정한 콜백함수를 한 번씩 실행
+// 반환값 없음.
+// 단순 반속, 원본 배열 변경가능
+let 분류 = ["순번", "구", "가맹점", "주소", "동"];
+분류.forEach((item, idx) => {
+  console.log(idx, item);
+});
+// map 변환 후 새로운 배열 만들기
+// 원본 유지, 새로운 배열 생성
+let prices = [10000, 2000, 3000];
+let withTax = prices.map(price => price * 1.1);
+console.log(withTax);
+console.log(prices);
+// filter 조건에 맞는 것만 걸러내기
+let passed = prices.filter(price => price >= 3000);
+console.log(passed);
+// // find 조건에 맞는 첫 번째 찾기 (찹으면 바로 반환) 빠름.
+// let users = [
+//     { id: 1, name: 'Pang' }
+//   , { id: 2, name: 'Lee' }
+//   , { id: 3, name: 'Kim' }
+// ];
+// let lee = users.find(user => user.name == 'Lee');
+// console.log(lee);
+
+
+</script>
+
+    
+</body>

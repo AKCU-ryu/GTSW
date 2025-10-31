@@ -1,0 +1,55 @@
+{% extends 'shell.html' %}
+{% block title %}공동 가계부 - 총무 홈{% endblock %}
+
+{% block content %}
+<section class="admin-dashboard">
+  <header class="section-header">
+    <h2>총무(관리자) 페이지</h2>
+    <p>최근 입금과 출금, 멤버 현황을 한 눈에 확인하세요.</p>
+  </header>
+  <div class="admin-grid">
+    <article class="summary-card">
+      <h3>이번 달 총정산</h3>
+      <dl>
+        <div><dt>입금</dt><dd>₩{{ '{:,.0f}'.format(monthly_totals['income']) }}</dd></div>
+        <div><dt>출금</dt><dd>₩{{ '{:,.0f}'.format(monthly_totals['expense']) }}</dd></div>
+        <div><dt>잔액</dt><dd>₩{{ '{:,.0f}'.format(monthly_totals['net']) }}</dd></div>
+      </dl>
+      <a class="inline-link" href="{{ url_for('main.main_index') }}">달력으로 이동</a>
+    </article>
+
+    <article class="summary-card">
+      <h3>멤버 현황</h3>
+      <ul class="summary-list">
+        {% for row in member_balances %}
+          <li>
+            <span class="summary-name">{{ row['member'].display_name() }}</span>
+            <span class="summary-amount">₩{{ '{:,.0f}'.format(row['balance']) }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+      <p class="muted">인덱스 버튼으로 멤버별 페이지를 관리하세요.</p>
+    </article>
+
+    <article class="summary-card">
+      <h3>최근 내역</h3>
+      <ul class="summary-list">
+        {% for entry in latest_entries %}
+          <li>
+            <span>{{ entry.occurred_on.strftime('%m/%d') }} · {{ entry.category }}</span>
+            <strong class="{{ entry.entry_type }}">₩{{ '{:,.0f}'.format(entry.amount) }}</strong>
+          </li>
+        {% else %}
+          <li class="muted">최근 내역이 없습니다.</li>
+        {% endfor %}
+      </ul>
+      <div class="button-row">
+        <button type="button" class="action-button" data-modal-target="#entry-modal" data-entry-type="income">입금 추가</button>
+        <button type="button" class="action-button" data-modal-target="#entry-modal" data-entry-type="expense">출금 추가</button>
+      </div>
+    </article>
+  </div>
+</section>
+
+{% include 'partials/entry_modal.html' %}
+{% endblock %}

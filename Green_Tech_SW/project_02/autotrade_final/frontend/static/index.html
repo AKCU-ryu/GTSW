@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Autotrade Test</title>
+  <style>
+    body { font-family: system-ui,Helvetica,Arial; margin: 24px; }
+    .row { display:flex; gap:8px; align-items:center; margin-bottom:12px;}
+    input,button,select { padding:8px; font-size:14px; }
+    pre { background:#111; color:#fff; padding:12px; border-radius:8px; overflow:auto; }
+    .card { border:1px solid #e5e7eb; border-radius:12px; padding:12px; margin-top:12px;}
+    h2 { margin:8px 0; }
+  </style>
+</head>
+<body>
+  <h1>Autotrade – 테스트 패널</h1>
+  <div class="row">
+    <label>종목(6자리):</label><input id="code" value="000660"/>
+    <button onclick="getQuote()">현재가</button>
+    <button onclick="getOHLCV()">일봉</button>
+    <button onclick="getSignal()">시그널</button>
+  </div>
+  <div class="row">
+    <select id="side">
+      <option value="BUY">매수</option>
+      <option value="SELL">매도</option>
+    </select>
+    <select id="ptype">
+      <option value="MARKET">시장가</option>
+      <option value="LIMIT">지정가</option>
+    </select>
+    <input id="qty" type="number" value="1" min="1"/>
+    <input id="lpx" type="number" placeholder="지정가(선택)"/>
+    <button onclick="placeOrder()">주문</button>
+    <button onclick="getPositions()">포지션</button>
+  </div>
+
+  <div class="card">
+    <h2>응답</h2>
+    <pre id="out">{}</pre>
+  </div>
+
+  <script>
+    const api = (p, opt={}) => fetch(p, opt).then(r => r.json());
+    const out = (v) => document.querySelector('#out').textContent = JSON.stringify(v, null, 2);
+
+    async function getQuote(){
+      const code = document.querySelector('#code').value.trim();
+      out(await api(`/quote/${code}`));
+    }
+    async function getOHLCV(){
+      const code = document.querySelector('#code').value.trim();
+      out(await api(`/ohlcv`, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({code, start:'2019-01-01'})}));
+    }
+    async function getSignal(){
+      const code = document.querySelector('#code').value.trim();
+      out(await api(`/signal`, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({code, start:'2019-01-01'})}));
+    }
+    async function placeOrder(){
+      const body = {
+        side: document.querySelector('#side').value,
+        code: document.querySelector('#code').value.trim(),
+        qty: Number(document.querySelector('#qty').value),
+        priceType: document.querySelector('#ptype').value,
+        limitPrice: document.querySelector('#lpx').value ? Number(document.querySelector('#lpx').value) : null
+      };
+      out(await api(`/orders`, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)}));
+    }
+    async function getPositions(){
+      out(await api(`/positions`));
+    }
+  </script>
+</body>
+</html>

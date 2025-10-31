@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+<input type="file" id="csvFile" accept=".csv" />
+<div id="output"></div>
+
+<!-- PapaParse CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+
+<script>
+document.getElementById("csvFile").addEventListener("change", function (e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  Papa.parse(file, {
+    header: true,         // 첫 행을 컬럼명으로 사용
+    skipEmptyLines: true, // 빈 줄 무시
+    encoding: "euc-kr",   // ANSI
+    complete: function (results) {
+      const data = results.data; // JSON 배열 형태
+      console.log(data);
+
+      // 테이블로 출력
+      let html = "<table border='1' cellspacing='0' cellpadding='5'>";
+      html += "<tr>";
+      Object.keys(data[0]).forEach(col => {
+        html += "<th>" + col + "</th>";
+      });
+      html += "</tr>";
+
+      data.forEach(row => {
+        html += "<tr>";
+        Object.values(row).forEach(val => {
+          html += "<td>" + (val || "") + "</td>";
+        });
+        html += "</tr>";
+      });
+
+      html += "</table>";
+      document.getElementById("output").innerHTML = html;
+    }
+  });
+});
+</script>
+
+    
+</body>

@@ -1,0 +1,21 @@
+# requirements.txt
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+python-dotenv==1.0.1
+scikit-learn==1.5.2
+yfinance==0.2.43
+ta==0.11.0
+
+PyQt5==5.15.11
+requests>=2.32.3
+
+websockets==15.0.1
+numpy==1.26.4
+Flask>=3.0
+pandas>=2.2
+loguru==0.7.2
+pycryptodome==3.22.0
+pykiwoom==0.1.6
+urllib3==1.26.15
+beautifulsoup4==4.13.4
+openpyxl==3.1.5

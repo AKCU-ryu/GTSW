@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+*.log
+ECHO가 설정되어 있지 않습니다.
+# Flask / Build
+instance/
+*.db
+*.sqlite3
+ECHO가 설정되어 있지 않습니다.
+# Java / Spring
+target/
+.classpath
+.project
+.settings/
+*.iml
+.idea/
+ECHO가 설정되어 있지 않습니다.
+# Node / Frontend
+node_modules/
+dist/
+build/
+ECHO가 설정되어 있지 않습니다.
+# OS
+.DS_Store
+Thumbs.db
+*.zip
+*.pptx
+*.psd
+*.mp4

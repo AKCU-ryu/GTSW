@@ -1,0 +1,52 @@
+<!-- app/web/index.html -->
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>project_stock</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">Tripper Stocks</div>
+    <nav></nav>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <h2>종목 시세</h2>
+      <div class="row">
+        <input id="code" placeholder="005930.KS" value="005930.KS"/>
+        <button id="btnPrice">조회</button>
+      </div>
+      <pre id="priceBox" class="pre"></pre>
+    </section>
+
+    <section class="card">
+      <h2>시장가 주문(모의)</h2>
+      <div class="row">
+        <input id="code2" placeholder="005930.KS" value="005930.KS"/>
+        <input id="qty" type="number" placeholder="수량" value="10"/>
+        <select id="side">
+          <option value="buy">매수</option>
+          <option value="sell">매도</option>
+        </select>
+        <button id="btnOrder">주문</button>
+      </div>
+      <pre id="orderBox" class="pre"></pre>
+    </section>
+
+    <section class="card">
+      <h2>추천(모멘텀/RSI)</h2>
+      <div class="row">
+        <input id="codes" placeholder="쉼표로 구분" value="005930.KS,000660.KS,035720.KS"/>
+        <button id="btnReco">추천</button>
+      </div>
+      <pre id="recoBox" class="pre"></pre>
+    </section>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>

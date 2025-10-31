@@ -1,0 +1,8 @@
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+pydantic>=2.7.0
+requests>=2.31.0
+pandas>=2.1.0
+FinanceDataReader>=0.9.90
+pykrx>=1.0.48
+loguru>=0.7.0

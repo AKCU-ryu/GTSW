@@ -1,0 +1,65 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>대전광역시_온통대전 신청 가맹점 목록 조회</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+</head>
+<body>
+    <div class="container text-left">
+        <div class="row justify-content-center">
+            <div class="col-md-10 mt-2 pt-5">
+                <table class="table table-dark table-hover">
+                    <colgroup>
+                        <col style="width: 25%;">
+                        <col style="width: 20%;">
+                        <col style="width: 55%;">
+                    </colgroup>
+                    <thead>
+                        <tr><th>se</th><th>mrhst_nm</th><th>adres</th><th>adstrd_nm</th></tr>
+                    </thead>
+                    <tbody id="tb"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+         const API_KEY = "QpWPp9txkmGnVhhlXoHPY8ifB9x/4qxyqYeCH7jFzB82up9cr2dCbJI7veH8NjbhVOzcBFRTKDMgpWQmA/bf2A==";
+        //  QpWPp9txkmGnVhhlXoHPY8ifB9x%2F4qxyqYeCH7jFzB82up9cr2dCbJI7veH8NjbhVOzcBFRTKDMgpWQmA%2Fbf2A%3D%3D
+        //  QpWPp9txkmGnVhhlXoHPY8ifB9x/4qxyqYeCH7jFzB82up9cr2dCbJI7veH8NjbhVOzcBFRTKDMgpWQmA/bf2A==
+         let url ="http://bigdata.daejeon.go.kr/openApi/6300000/getOtdjReqstMrhst/getOtdjReqstMrhstlist?pageNo=1&numOfRows=10"
+         $.ajax({
+                url: url
+               ,dataType:'JSON'
+               ,type:'GET'
+               ,data:{ serviceKey : API_KEY
+                      ,numOfRows : 13
+                      ,pageNo : 1
+               },success : function(res){
+                   let items = res['response']['body']['items'];
+                   console.log(items);
+                   Array.from(items).forEach(item => {
+                            let str = `<tr>
+                                       <td>${item.festvNm}</td>
+                                       <td>${item.festvPrid}</td>
+                                       <td>${item.festvTpic}</td>
+                                       </tr>`;
+                            $("#tb").append(str);
+                   });
+               }
+               ,error: function(e){
+                    console.log(e)
+               }
+         });
+    </script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<body>
+<p style="margin-top:-12px">
+  <em class="link">
+    <a href="/web/documentation/#CategoryCode" target="_blank">카테고리 코드목록을 보시려면 여기를 클릭하세요!</a>
+  </em>
+</p>
+
+<div id="map" style="width:100%;height:350px;"></div>
+
+<!-- Kakao Maps SDK (services 포함) -->
+<script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=7bdd6f8f52c48f9801f463f213f0d03e&libraries=services,clusterer"></script>
+<script>
+// ===================== 설정 =====================
+const CITYHALL = { lat: 36.350411, lng: 127.384547 }; // 대전광역시청 좌표(정확도 높은 값)
+const LEVEL = 3; // 초기 확대 레벨
+
+// ===================== 공용 객체 =====================
+var infowindow = new kakao.maps.InfoWindow({ zIndex: 2 }); // 카테고리 마커용
+var mapContainer = document.getElementById('map');
+var mapOption = {
+  center: new kakao.maps.LatLng(CITYHALL.lat, CITYHALL.lng), // 시청으로 중심 고정
+  level: LEVEL
+};
+var map = new kakao.maps.Map(mapContainer, mapOption);
+
+// ===================== 대전시청 고정 마커 =====================
+var cityhallMarker = new kakao.maps.Marker({
+  position: new kakao.maps.LatLng(CITYHALL.lat, CITYHALL.lng),
+  map: map
+});
+
+// 고정 인포윈도우(항상 표시되게 open)
+var cityhallInfo = new kakao.maps.InfoWindow({
+  content: '<div style="padding:6px 10px;font-weight:600;">대전광역시청</div>'
+});
+cityhallInfo.open(map, cityhallMarker);
+
+// (선택) 마커 클릭하면 다시 열리도록
+kakao.maps.event.addListener(cityhallMarker, 'click', function () {
+  cityhallInfo.open(map, cityhallMarker);
+});
+
+// ===================== 카테고리 검색 (은행: BK9) =====================
+var ps = new kakao.maps.services.Places(map);
+
+// 현재 지도 범위 내 은행 검색
+ps.categorySearch('BK9', placesSearchCB, { useMapBounds: true });
+
+// 줌/이동 후에도 다시 검색하고 싶다면 아래 주석 해제
+// kakao.maps.event.addListener(map, 'idle', function() {
+//   ps.categorySearch('BK9', placesSearchCB, { useMapBounds: true });
+// });
+
+// 검색 콜백
+function placesSearchCB(data, status, pagination) {
+  if (status !== kakao.maps.services.Status.OK) return;
+
+  // 결과 마커 표시
+  for (var i = 0; i < data.length; i++) {
+    displayMarker(data[i]);
+  }
+}
+
+// 카테고리 결과 마커 표시
+function displayMarker(place) {
+  var marker = new kakao.maps.Marker({
+    map: map,
+    position: new kakao.maps.LatLng(place.y, place.x)
+  });
+
+  // 마커 클릭 시 인포윈도우(장소명)
+  kakao.maps.event.addListener(marker, 'click', function () {
+    infowindow.setContent('<div style="padding:5px 8px;font-size:12px;">' + place.place_name + '</div>');
+    infowindow.open(map, marker);
+  });
+}
+</script>
+</body>

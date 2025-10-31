@@ -1,0 +1,33 @@
+project_stock/
+├─ .env.example
+├─ requirements.txt
+├─ README.md
+├─ app/
+│  ├─ main.py
+│  ├─ config.py
+│  ├─ routers/
+│  │  ├─ quotes.py
+│  │  ├─ orders.py
+│  │  └─ reco.py
+│  ├─ services/
+│  │  ├─ broker_base.py
+│  │  ├─ broker_mock.py
+│  │  ├─ broker_kiwoom_stub.py      # 추후 교체 지점(키움)
+│  │  ├─ broker_kis_stub.py         # 추후 교체 지점(REST(APPKEY))
+│  │  └─ ml/
+│  │     ├─ data.py
+│  │     ├─ features.py
+│  │     ├─ lstm.py                 # 딥러닝(선택) - 스텁/예시
+│  │     └─ reco_simple.py          # 1단계 추천(모멘텀/RSI)
+│  └─ web/
+│     ├─ index.html
+│     ├─ styles.css
+│     └─ app.js
+
+
+# (Windows, Anaconda 프롬프트)
+conda create -n kiwoom_web python=3.10 -y
+conda activate kiwoom_web
+
+pip install -r requirements.txt
+

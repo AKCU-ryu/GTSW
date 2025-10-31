@@ -1,0 +1,11 @@
+Flask>=3.0.0
+Flask-SQLAlchemy>=3.1.1
+click>=8.1.7
+requests>=2.31.0
+numpy>=1.24.0
+tensorflow>=2.13.0
+flask-migrate==4.0.7
+python-dotenv==1.0.1
+# SQLite만 쓸 거면 여기까지면 충분
+# Oracle 쓰려면 추가:
+cx_Oracle==8.3.0

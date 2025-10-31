@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>json 파일 가져오기</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+</head>
+
+<body>
+    <h2>json 파일 읽기</h2>
+    <pre id="output"></pre>
+    <script>
+        $(document).ready(function () {
+            let files = [ ];
+
+            // $.getJSON(files[0], function (data) {
+            //     console.log(data);
+            //     targetMovies = data.boxOfficeResult.dailyBoxOfficeList.map(v => {
+            //         return v.movieNm
+            //     });
+            // });
+
+            async function get_data() {   // await는 async 안에서만 사용 가능
+                let data = await $.getJSON(files[0]);
+                tagetMovies = data.boxOfficeResult.dailyBoxOfficeList.map(v =>v.movieNm);
+                console.log(tagetMovies);
+            }
+            get_data();
+
+            async function get_movies() {
+                let commonSet = null;
+                for(let file of files){
+                    let data = await $.getJSON(file);
+                    let movieSet = new Set(data.boxOfficeResult.dailyBoxOfficeList.map(v=>v.movieNm));
+                    if(commonSet ==null){
+                        commonSet = movieSet;
+                    } else {
+                        // 교집합 계산
+                        let temp = [];
+                        Array.from(commonSet).forEach((x)=>{
+                            if(movieSet.has(x)){
+                                temp.push(x);
+                            }
+                            commonSet = new Set(temp);
+                        });
+                    }   
+                }
+                $("#output").text(Array.from(commonSet).join('\n'));
+            }
+            get_movies();
+        });
+    </script>
+</body>
+</html>

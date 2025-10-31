@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ontong Daejeon Map + Roadview</title>
+  <!-- Bootstrap 5.3 (배지/버튼 스타일 참고) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Kakao Map API -->
+  <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=7bdd6f8f52c48f9801f463f213f0d03e&libraries=services,clusterer"></script>
+  <style>
+    :root { color-scheme: dark; }
+    body { margin:0; background:#0b0c0f; color:#eaecef; }
+    .topbar{ background:#ff7a00; height:64px; display:flex; align-items:center; gap:.5rem; padding:.5rem .75rem; }
+    .topbar .btn{ border-color:#2a2f36; }
+    .wrap { width:100%; height:calc(100dvh - 64px); display:flex; }
+    .pane { position:relative; flex:1 1 100%; }
+    #map, #roadview { width:100%; height:100%; }
+    .hidden { display:none !important; }
+    /* 분할 드래그 바 */
+    .divider { width:6px; cursor:col-resize; background:#2a2f36; }
+    /* 우상단 작은 안내 */
+    .hint { position:absolute; top:.5rem; right:.5rem; background:rgba(0,0,0,.6); padding:.25rem .5rem; border-radius:.5rem; font-size:.85rem; }
+  </style>
+</head>
+<body>
+
+  <!-- 상단 오렌지 바: 토글/분할/내 위치 -->
+  <div class="topbar">
+    <button id="btnTraffic" class="btn btn-dark btn-sm">실시간교통</button>
+    <button id="btnRoadviewOvl" class="btn btn-dark btn-sm">로드뷰 오버레이</button>
+    <button id="btnSplit" class="btn btn-dark btn-sm">분할보기</button>
+    <button id="btnOnlyMap" class="btn btn-dark btn-sm">지도만</button>
+    <button id="btnOnlyRv" class="btn btn-dark btn-sm">로드뷰만</button>
+    <button id="btnMyPos" class="btn btn-dark btn-sm">내 위치</button>
+    <span class="ms-auto small fw-semibold">Ontong Daejeon :D</span>
+  </div>
+
+  <!-- 본문: 지도/로드뷰 -->
+  <div class="wrap" id="wrap">
+    <div class="pane" id="paneMap">
+      <div id="map"></div>
+      <div class="hint">지도를 클릭하면 로드뷰가 해당 위치로 이동합니다.</div>
+    </div>
+    <div class="divider hidden" id="divider"></div>
+    <div class="pane hidden" id="paneRv">
+      <div id="roadview"></div>
+      <div class="hint">로드뷰 이동 시 지도에 시점이 표시됩니다.</div>
+    </div>
+  </div>
+
+  <!-- (원본) 데모용 마커/이벤트는 그대로 유지 → 아래 스크립트에 통합 -->
+  <script>
+    // ===== 공용 상태 =====
+    const CENTER = new kakao.maps.LatLng(36.34995, 127.38483);
+    const MARKER_POS = new kakao.maps.LatLng(36.35053, 127.38486);
+
+    let map, roadview, rvClient, trafficOn=false, rvOverlayOn=false;
+    let marker, rvPointMarker, clusterer;
+    // 지도 컨트롤
+    let mapTypeControl, zoomControl;
+
+    // ===== 지도 초기화 =====
+    function initMap(){
+      map = new kakao.maps.Map(document.getElementById('map'), {
+        center: CENTER,
+        level: 1,
+        mapTypeId : kakao.maps.MapTypeId.ROADMAP
+      });
+
+      // 컨트롤
+      mapTypeControl = new kakao.maps.MapTypeControl();
+      map.addControl(mapTypeControl, kakao.maps.ControlPosition.TOPRIGHT);
+      zoomControl = new kakao.maps.ZoomControl();
+      map.addControl(zoomControl, kakao.maps.ControlPosition.RIGHT);
+
+      // 이벤트 로그 (원본 유지)
+      kakao.maps.event.addListener(map, 'center_changed', function () {
+        console.log('지도의 중심 좌표는 ' + map.getCenter().toString() +' 입니다.');
+      });
+      kakao.maps.event.addListener(map, 'zoom_changed', function () {
+        console.log('지도의 현재 확대레벨은 ' + map.getLevel() +'레벨 입니다.');
+      });
+      kakao.maps.event.addListener(map, 'idle', function () {
+        console.log(`중심 ${map.getCenter().toString()}, 레벨 ${map.getLevel()}`);
+      });
+      kakao.maps.event.addListener(map, 'click', function (mouseEvent) {
+        console.log('지도 클릭: ' + mouseEvent.latLng.toString());
+        // 클릭 지점으로 로드뷰 동기화
+        moveRoadview(mouseEvent.latLng);
+        // 로드뷰 보이기(분할 또는 단독)
+        ensureRoadviewVisible();
+      });
+      kakao.maps.event.addListener(map, 'drag', function () {
+        console.log('지도를 드래그 중… 중심: ' + map.getCenter().toString());
+      });
+
+      // 마커 이미지(원본 유지)
+      var markerImageUrl = 'https://t1.daumcdn.net/localimg/localimages/07/2012/img/marker_p.png',
+          markerImageSize = new kakao.maps.Size(40, 42),
+          markerImageOptions = { offset : new kakao.maps.Point(19, 15) };
+      var markerImage = new kakao.maps.MarkerImage(markerImageUrl, markerImageSize, markerImageOptions);
+
+      // 데모 마커(드래그 가능)
+      marker = new kakao.maps.Marker({
+        position: MARKER_POS,
+        draggable : true,
+        image : markerImage,
+        map: map
+      });
+
+      var infowindow = new kakao.maps.InfoWindow({
+        content : '<div style="padding:5px;">Ontong Daejeon :D</div>'
+      });
+      infowindow.open(map, marker);
+
+      kakao.maps.event.addListener(marker, 'click', function() { alert('마커를 클릭했습니다!'); });
+      kakao.maps.event.addListener(marker, 'mouseover', function(){ console.log('마커 mouseover'); });
+      kakao.maps.event.addListener(marker, 'mouseout', function(){ console.log('마커 mouseout'); });
+      kakao.maps.event.addListener(marker, 'dragstart', function(){ console.log('마커 dragstart'); });
+      kakao.maps.event.addListener(marker, 'dragend', function(){ console.log('마커 dragend'); });
+
+      // 로드뷰/교통 오버레이(기본 OFF; 버튼으로 토글)
+      // map.addOverlayMapTypeId(kakao.maps.MapTypeId.ROADVIEW);
+      // map.addOverlayMapTypeId(kakao.maps.MapTypeId.TRAFFIC);
+
+      // 클러스터러(향후 다중 가맹점 마커용) - 데모: 마커 하나만 연결
+      clusterer = new kakao.maps.MarkerClusterer({
+        map: map,
+        averageCenter: true,
+        minLevel: 5
+      });
+      clusterer.addMarker(marker); // 추후 다건 마커 추가 시 여기로 push
+    }
+
+    // ===== 로드뷰 초기화 =====
+    function initRoadview(){
+      rvClient = new kakao.maps.RoadviewClient();
+      roadview = new kakao.maps.Roadview(document.getElementById('roadview'), {
+        panoX : CENTER.getLng(),
+        panoY : CENTER.getLat(),
+        pan: 0, tilt: 0, zoom: 0
+      });
+
+      kakao.maps.event.addListener(roadview, 'init', function() {
+        console.log('로드뷰 init 완료');
+      });
+      kakao.maps.event.addListener(roadview, 'viewpoint_changed', function() {
+        console.log('로드뷰 시점 변경');
+        drawRvPointOnMap();
+      });
+      kakao.maps.event.addListener(roadview, 'position_changed', function() {
+        console.log('로드뷰 좌표 변경');
+        drawRvPointOnMap();
+      });
+    }
+
+    // 지도에 로드뷰 시점을 작은 점으로 표시
+    function drawRvPointOnMap(){
+      const pos = roadview.getPosition();
+      if(!pos) return;
+      if(!rvPointMarker){
+        rvPointMarker = new kakao.maps.CustomOverlay({
+          position: pos,
+          content: '<div style="width:10px;height:10px;border-radius:50%;background:#7cc5ff;border:2px solid #1b73e8;"></div>',
+          yAnchor: 0.5, xAnchor: 0.5
+        });
+      }
+      rvPointMarker.setPosition(pos);
+      rvPointMarker.setMap(map);
+    }
+
+    // 특정 좌표의 가장 가까운 로드뷰로 이동
+    function moveRoadview(latlng){
+      rvClient.getNearestPanoId(latlng, 50, function(panoId){
+        if(panoId){
+          roadview.setPanoId(panoId, latlng);
+        }else{
+          console.log('해당 지점에서 50m 이내 로드뷰가 없습니다.');
+        }
+      });
+    }
+
+    // ===== UI: 버튼 동작 =====
+    function toggleTraffic(){
+      if(trafficOn){
+        map.removeOverlayMapTypeId(kakao.maps.MapTypeId.TRAFFIC);
+      }else{
+        map.addOverlayMapTypeId(kakao.maps.MapTypeId.TRAFFIC);
+      }
+      trafficOn = !trafficOn;
+    }
+    function toggleRoadviewOverlay(){
+      if(rvOverlayOn){
+        map.removeOverlayMapTypeId(kakao.maps.MapTypeId.ROADVIEW);
+      }else{
+        map.addOverlayMapTypeId(kakao.maps.MapTypeId.ROADVIEW);
+      }
+      rvOverlayOn = !rvOverlayOn;
+    }
+
+    // 분할/단독 보기
+    function setSplitMode(on){
+      const paneMap = document.getElementById('paneMap');
+      const paneRv = document.getElementById('paneRv');
+      const divider = document.getElementById('divider');
+      if(on){
+        paneMap.classList.remove('hidden');
+        paneRv.classList.remove('hidden');
+        divider.classList.remove('hidden');
+      }else{
+        paneMap.classList.remove('hidden');
+        paneRv.classList.add('hidden');
+        divider.classList.add('hidden');
+        // 폭 초기화
+        paneMap.style.flex = '1 1 100%';
+        paneRv.style.flex = '1 1 100%';
+      }
+      kakao.maps.event.trigger(map, 'resize');
+      roadview && roadview.relayout();
+    }
+    function showOnlyMap(){
+      document.getElementById('paneMap').classList.remove('hidden');
+      document.getElementById('paneRv').classList.add('hidden');
+      document.getElementById('divider').classList.add('hidden');
+      kakao.maps.event.trigger(map, 'resize');
+    }
+    function showOnlyRv(){
+      document.getElementById('paneMap').classList.add('hidden');
+      document.getElementById('paneRv').classList.remove('hidden');
+      document.getElementById('divider').classList.add('hidden');
+      roadview && roadview.relayout();
+    }
+    function ensureRoadviewVisible(){
+      // 로드뷰가 하나도 안 보이면 분할 보기로 전환
+      const paneRvHidden = document.getElementById('paneRv').classList.contains('hidden');
+      const paneMapHidden = document.getElementById('paneMap').classList.contains('hidden');
+      if(paneRvHidden && paneMapHidden){ setSplitMode(true); return; }
+      if(paneRvHidden){ setSplitMode(true); }
+      roadview && roadview.relayout();
+    }
+
+    // 내 위치로 이동
+    function goMyPosition(){
+      if(!navigator.geolocation){ alert('브라우저가 위치를 지원하지 않습니다.'); return; }
+      navigator.geolocation.getCurrentPosition(pos=>{
+        const center = new kakao.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
+        map.setCenter(center);
+        // 클릭 없이도 로드뷰 보고 싶다면 아래 주석 해제
+        // moveRoadview(center); ensureRoadviewVisible();
+      }, ()=> alert('위치 권한을 허용해주세요.'), { enableHighAccuracy:true, timeout:3000 });
+    }
+
+    // ===== 분할 드래그 =====
+    function enableDividerDrag(){
+      const divider = document.getElementById('divider');
+      const paneMap = document.getElementById('paneMap');
+      const paneRv = document.getElementById('paneRv');
+      let dragging=false;
+
+      divider.addEventListener('mousedown', ()=> dragging=true);
+      window.addEventListener('mouseup', ()=> dragging=false);
+      window.addEventListener('mousemove', (e)=>{
+        if(!dragging) return;
+        const wrapRect = document.getElementById('wrap').getBoundingClientRect();
+        const relX = Math.min(Math.max(e.clientX - wrapRect.left, 120), wrapRect.width - 120);
+        const leftRatio = relX / wrapRect.width;
+        paneMap.style.flex = `${leftRatio} 1 0%`;
+        paneRv.style.flex = `${1-leftRatio} 1 0%`;
+        kakao.maps.event.trigger(map, 'resize');
+        roadview && roadview.relayout();
+      });
+    }
+
+    // ===== 키보드 단축키 =====
+    function bindHotkeys(){
+      window.addEventListener('keydown', (e)=>{
+        if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        if(e.key.toLowerCase() === 't'){ toggleTraffic(); }        // T: 교통
+        if(e.key.toLowerCase() === 'r'){ toggleRoadviewOverlay(); } // R: 로드뷰 오버레이
+        if(e.key.toLowerCase() === 's'){ setSplitMode(true); }      // S: 분할
+        if(e.key.toLowerCase() === 'm'){ showOnlyMap(); }           // M: 지도만
+        if(e.key.toLowerCase() === 'v'){ showOnlyRv(); }            // V: 로드뷰만
+      });
+    }
+
+    // ===== 초기화 =====
+    document.addEventListener('DOMContentLoaded', ()=>{
+      initMap();
+      initRoadview();
+      // 버튼 바인딩
+      document.getElementById('btnTraffic').addEventListener('click', toggleTraffic);
+      document.getElementById('btnRoadviewOvl').addEventListener('click', toggleRoadviewOverlay);
+      document.getElementById('btnSplit').addEventListener('click', ()=> setSplitMode(true));
+      document.getElementById('btnOnlyMap').addEventListener('click', showOnlyMap);
+      document.getElementById('btnOnlyRv').addEventListener('click', showOnlyRv);
+      document.getElementById('btnMyPos').addEventListener('click', goMyPosition);
+      // 분할 드래그
+      enableDividerDrag();
+      // 단축키
+      bindHotkeys();
+    });
+  </script>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

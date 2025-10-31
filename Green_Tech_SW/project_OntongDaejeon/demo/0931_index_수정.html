@@ -1,0 +1,2023 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Ontong Daejeon</title>
+    <!-- <link rel="preconnect" href="https://fonts.googleapis.com" />    // 구글 폰트 로딩 최적화(필수) -->
+    <!-- <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />    // 구글 폰트 로딩 최적화(필수) -->
+    <!-- <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Borel&display=swap" rel="stylesheet" /> // 구글 폰트 -->
+  <style>
+    :root {  /* 메인, 텍스트, 배경 등 주 색상코드 */
+      --brand: #FF8215;         /* main 오렌지 */
+      --brand-600: #D96500;     /* hover 오렌지 어두운색 */
+      --brand-700: #BC5800;     /* active 오렌지 더 어두운색 */
+      --bg: #f8f9fa;            /* 전체 배경 */
+      --ink: #111;              /* 본문 텍스트 */
+      --muted: #565D6D;         /* 보조 텍스트 */
+      --surface: #ffffff;       /* 카드, 패널 배경 */
+      --surface-2: #FFEAD8;     /* 헤더, 푸터 배경 (연한 오렌지) */
+      --line: #e9ecef;          /* 구분선 */
+      --panel: #ffffff;         /* 좌측 패널 배경 */
+      --panel-line: #e9ecef;    /* 좌측 패널 구분선 */
+      --btn-text: #fff;         /* 버튼 텍스트 */
+      --input-bg: rgba(255, 255, 255, .78); /* 검색창 배경 */
+      --input-border: var(--brand);           /* 검색창 테두리 */
+      --shadow-sm: 0 1px 2.5px rgba(23, 26, 31, .07), 0 0 2px rgba(23, 26, 31, .08);  /* 작은 그림자 */
+      --ring: 0 0 0 3px rgba(255, 130, 21, .25);    /* 포커스 링 */
+      --header-height: 64px;        /* 헤더 높이 */
+      --footer-min-height: 180px;   /* 푸터 최소 높이 */
+    }
+
+    /* 다크 테마 (버튼) */
+    .theme-dark {   
+      --bg: #0b0c0f;            /* 전체 배경 */
+      --ink: #eaecef;           /* 본문 텍스트 */
+      --muted: #9aa4b2;         /* 보조 텍스트 */
+      --surface: #121418;       /* 카드, 패널 배경 */
+      --surface-2: #2a2f36;     /* 헤더, 푸터 배경 (진한 회색) */
+      --line: #1f232a;          /* 구분선 */
+      --panel: #111318;         /* 좌측 패널 배경 */
+      --panel-line: #20242b;    /* 좌측 패널 구분선 */
+      --btn-text: #fff;         /* 버튼 텍스트 */
+      --input-bg: rgba(23, 26, 31, .72);    /* 검색창 배경 */
+      --input-border: #ff9a4a;              /* 검색창 테두리 */
+      --shadow-sm: 0 6px 24px rgba(0, 0, 0, .35);   /* 그림자 */
+    }
+
+    /* 기본 스타일 */
+    * { box-sizing: border-box; }           /* 패딩, 보더 포함 */
+    html, body { height: 100%; margin: 0; } /* html, body 100% 높이, 기본 마진 제거 */
+    body {
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans KR", sans-serif;   /* 본문 폰트 */
+      color: var(--ink);        /* 본문 텍스트 색상 */
+      background: var(--bg);    /* 전체 배경 색상 */
+      display: flex;            /* 플렉스 박스 */
+      flex-direction: column;   /* 세로 방향 */
+      min-height: 100vh;        /* 최소 높이 100vh */
+    }
+
+    /* 상단 바 */
+    .topbar {   
+      position: sticky; /* 스크롤 시 상단 고정 */
+      top: 0;           /* 상단에 붙이기 */
+      z-index: 1000;    /* 최상단 레이어 */
+      width: 100%;      /* 전체 너비 */
+      background: var(--surface-2);     /* 헤더 배경 색상 */
+      box-shadow: 0 0 1px rgba(23, 26, 31, .25), 0 2px 12px rgba(23, 26, 31, .08);  /* 헤더 그림자 */
+    }
+
+    /* 상단 바 내부 */
+    .topbar__inner {
+      max-width: 1200px;        /* 최대 너비 */
+      margin: 0 auto;           /* 가운데 정렬 */
+      padding: 30px 10px 10px;  /* 상,좌,우,하단 패딩 */
+      display: flex;            /* 플렉스 박스 */
+      align-items: center;      /* 세로 중앙 정렬 */
+      gap: 12px;                /* 아이템 간격 */    
+      min-height: var(--header-height); /* 최소 높이 */
+    }
+
+    /* 패널 토글 버튼 */
+    .panel-toggle {
+      appearance: none;                 /* 기본 스타일 제거 */
+      border: 1px solid var(--line);    /* 테두리 */
+      background: #0000;              /* 배경 투명 */
+      color: var(--ink);                /* 아이콘 색상 */
+      border-radius: 8px;               /* 둥근 모서리 */
+      padding: 8px 10px;                /* 상하 8px, 좌우 10px 패딩 */
+      cursor: pointer;                  /* 커서 포인터 */
+      box-shadow: var(--shadow-sm);     /* 그림자 */
+    }
+
+    /* 패널 토글 버튼 호버 효과 */
+    .panel-toggle:hover {
+      background: rgba(0, 0, 0, .06);
+    }
+
+    /* 패널 토글 버튼 액티브 효과 */
+    .image {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;   /* 둥근 모서리 */
+      object-fit: cover;    /* 이미지 크기 맞춤 */
+      cursor: pointer;      /* 커서 포인터 */
+    }
+
+    /* 브랜드 타이틀 */
+    .topbar .text {
+      font-family: "Borel", system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans KR", sans-serif; /* 브랜드 폰트 */
+      font-size: 25px;      /*폰트 크기 */
+      font-weight: 700;     /* 폰트 굵기 */
+      color: var(--brand);  /* 색상 */
+      white-space: nowrap;  /* 텍스트 줄바꿈 방지 */
+      cursor: pointer;      /* 커서 포인터 */
+    }
+
+    /* 우측 메뉴 */
+    .header-menu {
+      display: flex;        /* 플렉스 박스 */
+      align-items: center;  /* 세로 중앙 정렬 */
+      gap: 8px;             /* 아이템 간격 */
+      margin-left: 8px;     /* 좌측 마진 */     
+    }   
+
+    /* 우측 메뉴 아이템 */
+    .header-menu .header-menu-item {
+      padding: 4px 12px;            /* 상하 4px, 좌우 12px 패딩 */
+      display: flex;                
+      align-items: center;          
+      justify-content: center;      /* 중앙 정렬 */
+      color: var(--ink);            
+      background: transparent;      /* 배경 투명 */
+      border: 1px solid var(--line);    /* 테두리 */
+      border-radius: 6px;       
+      cursor: pointer;          
+      white-space: nowrap;      
+      text-decoration: none;    /* 링크 밑줄 제거 */    
+      transition: background .2s ease, color .2s ease, border-color .2s ease;   /* 부드러운 전환 효과 */
+    }
+
+    /* 우측 메뉴 아이템 호버 효과 */
+    /* .header-menu .header-menu-item:hover {
+      background: rgba(0, 0, 0, .05);
+    } */
+
+    /* 우측 메뉴 아이템 액티브 효과 */
+    .header-menu .header-menu-item--primary {
+      color: var(--brand);
+      border-color: var(--brand);
+    }
+
+    /* 검색창 */
+    .textbox {
+      position: relative;       /* 상대 위치 */
+      display: flex;            
+      align-items: center;
+      gap: 8px;                 /* 아이템 간격 */
+      margin-left: auto;        /* 좌측 마진 자동 */
+      padding: 4px 6px;         /* 상하 4px, 좌우 6px 패딩 */
+      border-radius: 12px;         
+      background: var(--input-bg);   /* 검색창 배경 색상, 반투명 흰색 */
+      box-shadow: var(--shadow-sm);  /* 그림자, 작게 */
+    }
+
+    /* 검색창 포커스 효과 (박스 그림자, 포커스 링) */
+    .textbox input {
+      width: min(42vw, 280px);
+      height: 40px;
+      padding: 6px 12px;
+      color: var(--ink);
+      border: 1px solid var(--input-border);
+      border-radius: 8px;
+      background: #fff;
+      outline: none;
+    }
+    .theme-dark .textbox {
+      background: var(--input-bg);
+      box-shadow: none;
+    }
+
+    /* 다크 모드 검색창 */
+    .theme-dark .textbox input {
+      background: rgba(15, 17, 22, .85);
+      color: var(--ink);
+      border-color: var(--input-border);
+    }
+
+    /* 검색창 포커스 효과 (박스 그림자, 포커스 링) */
+    .btn-search {
+      height: 40px;
+      padding: 0 14px;
+      border: none;
+      border-radius: 8px;
+      background: var(--brand);
+      color: var(--btn-text);
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      transition: transform .08s ease, background .15s ease, box-shadow .15s ease;  /* 부드러운 전환 효과 (변형, 배경, 그림자) */
+      position: relative;   
+      overflow: hidden;   /* 리플 효과를 위한 오버플로우 숨김 */
+    }
+
+    /* 검색창 버튼 호버 효과 */
+    .btn-search:hover {
+      background: var(--brand-600);
+    }
+
+    /* 검색창 버튼 액티브 효과 */
+    .btn-search:active {
+      transform: translateY(1px);       /* 클릭 시 살짝 내려감 */
+      background: var(--brand-700);     /* 클릭 시 더 어두운 색상 */
+    }
+
+    /* 검색창 버튼 리플 효과 */
+    .btn-search::after {
+      content: "";          /* 리플 효과를 위한 가상 요소 */
+      position: absolute;   /* 절대 위치 */
+      inset: auto;          /* 모든 방향 자동 */
+      width: 0;             /* 초기 너비 0 */
+      height: 0;            /* 초기 높이 0 */
+      border-radius: 999px; 
+      background: rgba(255, 255, 255, .35); /* 반투명 흰색 */
+      transform: translate(-50%, -50%); /* 중앙 정렬 */
+      pointer-events: none;             /* 클릭 이벤트 무시 */
+      opacity: 0;                       /* 초기 투명도 0 */
+    }
+
+    /* 리플 애니메이션 */
+    .btn-search.ripple::after {
+      animation: ripple .5s ease;
+    }
+
+    /* 리플 애니메이션 키프레임 */
+    @keyframes ripple {
+      0% {
+        width: 0;
+        height: 0;
+        opacity: .5;
+      }
+
+      100% {
+        width: 220px;
+        height: 220px;
+        opacity: 0;
+      }
+    }
+
+    /* 본문 스타일 */
+    .theme-toggle {
+      appearance: none;                 /* 기본 스타일 제거 */
+      border: 1px solid var(--line);    /* 테두리 */
+      background: transparent;          /* 배경 투명 */
+      color: var(--ink);                /* 아이콘 색상(다크 모드에 따라 변경) */
+      border-radius: 8px;           
+      padding: 8px 10px;                /* 상하 8px, 좌우 10px 패딩 */
+      cursor: pointer;                  /* 커서 포인터 */
+      display: inline-flex;             /* 인라인 플렉스 박스 */
+      align-items: center;              /* 세로 중앙 정렬 */
+      gap: 6px;
+    }
+
+    /* 다크 모드 토글 버튼 호버 효과 */
+    .theme-toggle:hover {
+      background: rgba(0, 0, 0, .06);
+    }
+
+    /* 다크 모드 토글 버튼 액티브 효과 */
+    .category-bar {
+      background: var(--surface);
+      box-shadow: 0 1px 0 rgba(23, 26, 31, .08);
+    }
+
+    /* 카테고리 바 내부 */
+    .category-bar__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 10px 16px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    /* 카테고리 바 타이틀 */
+    .category-bar__title {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    /* 카테고리 스크롤 */
+    .category-scroll {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;     /* 가로 스크롤 */
+      padding-bottom: 4px;  /* 아래 여백 */
+      flex: 1 1 auto;       /* 가로로 늘어나고 줄어듦 */
+      min-height: 0;        /* 최소 높이 0 */
+      scroll-behavior: smooth; /* 부드러운 스크롤 */
+      scrollbar-color: rgba(23, 26, 31, .18) transparent; /* 스크롤바 색상, 투명 (thumb, track) */
+    }
+
+     /* 카테고리 스크롤 커스텀 스크롤바 */
+    .category-scroll::-webkit-scrollbar {
+      height: 6px;
+    }
+    /* 스크롤바 막대 */
+    .category-scroll::-webkit-scrollbar-thumb {
+      background: rgba(23, 26, 31, .18);
+      border-radius: 999px;
+    }
+
+    /* 스크롤바 트랙 */
+    .category-scroll::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .category-button {
+      appearance: none;
+      border: 1px solid rgba(23, 26, 31, .1);
+      background: rgba(255, 255, 255, .9);
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: 13px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background .2s ease, box-shadow .2s ease, transform .1s ease; /* 부드러운 전환 효과 , 배경, 그림자, 변형 */
+    }
+
+    /* 카테고리 버튼 호버 효과 */
+    .category-button:hover {
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(23, 26, 31, .08);
+    }
+
+    /* 카테고리 버튼 액티브 효과 */
+    .category-button:active {
+      transform: translateY(1px);
+    }
+    /* 다크 모드 카테고리 바 */
+    .theme-dark .category-bar {
+      background: var(--surface-2);
+      box-shadow: 0 1px 0 rgba(0, 0, 0, .35);
+    }
+    /* 다크 모드 카테고리 버튼 */
+    .theme-dark .category-button {
+      background: rgba(26, 29, 36, .9);
+      border-color: rgba(255, 255, 255, .08);
+      color: var(--ink);
+    }
+    /* 다크 모드 카테고리 버튼 호버 효과 */
+    .layout {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      flex: 1 1 auto;
+      min-height: 0;
+      height: 100%;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      grid-auto-rows: minmax(0, 1fr);
+      gap: 16px;
+      padding: 16px;
+    }
+    /* 패널 열기 */
+    .layout.panel-open {
+      grid-template-columns: 340px minmax(0, 1fr);
+    }
+    /* 좌측 패널 */
+    .sidepanel {
+      background: var(--panel);
+      border: 1px solid var(--panel-line);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, .05);
+      display: none;
+      flex-direction: column;
+    }
+    /* 패널 열기 */
+    .layout.panel-open .sidepanel,
+    /* 자바스크립트로 열기 */
+    .sidepanel.open {   
+      display: flex;    
+    }
+
+  /* 좌측 패널 공용 스크롤 박스 */
+  .panel-scroll{
+    overflow: auto;                 /* 스크롤 활성화 */
+    max-height: clamp(200px, 42vh, 560px);  /* 패널 높이에 맞게 조절 */
+    padding-right: 4px;             /* 스크롤과 내용 간격 */
+  }
+
+  /* WebKit 커스텀 스크롤바 (크롬/엣지/사파리) */
+  .panel-scroll::-webkit-scrollbar{ width:10px; }
+  .panel-scroll::-webkit-scrollbar-thumb{
+    background: rgba(23,26,31,.28);
+    border-radius: 8px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+  .panel-scroll::-webkit-scrollbar-thumb:hover{ background: rgba(23,26,31,.38); }
+  .panel-scroll::-webkit-scrollbar-track{ background: transparent; }
+
+  /* Firefox */
+  .panel-scroll{ scrollbar-width: thin; scrollbar-color: rgba(23,26,31,.28) transparent; }
+
+
+    /* 탭(검색, 즐겨찾기) */
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--panel-line);
+    }
+    .tab {
+      flex: 1;
+      text-align: center;
+      padding: 10px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    /* 활성 탭 */
+    .tab.active {
+      color: var(--brand);
+      border-bottom: 2px solid var(--brand);
+    }
+    /* 패널 헤드 */
+    .sidepanel__head {
+      padding: 12px;
+      border-bottom: 1px solid var(--panel-line);
+      display: grid;
+      gap: 8px;
+    }
+    /* 폼 필드 */
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+    /* 폼 필드 라벨 */
+    .label {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    /* 셀렉트 박스, 인풋 박스 */
+    .select,
+    .input {
+      height: 36px;
+      padding: 6px 10px;
+      border: 1px solid var(--panel-line);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--ink);
+    }
+    /* 셀렉트 박스 화살표 제거 */
+    .sidepanel__actions {
+      display: flex;
+      gap: 8px;
+    }
+    /* 패널 액션 버튼 */
+    .btn-outline {
+      background: transparent;
+      color: var(--ink);
+      border: 1px solid var(--panel-line);
+      border-radius: 8px;
+      height: 36px;
+      padding: 0 10px;
+      cursor: pointer;
+    }
+    /* 채우기 버튼 */
+    .btn-fill {
+      background: var(--brand);
+      color: #fff;
+      border: 0;
+      border-radius: 8px;
+      height: 36px;
+      padding: 0 12px;
+      cursor: pointer;
+    }
+    /* 채우기 버튼 호버 효과 */   
+    .btn-fill:hover {
+      background: var(--brand-600);
+    }
+    /* 채우기 버튼 액티브 효과 */
+    .panel-sections {
+      display: grid;
+      gap: 12px;
+      padding: 12px;
+      border-bottom: 1px solid var(--panel-line);
+      max-height: 220px;
+      overflow: auto;
+    }
+    /* 패널 섹션 타이틀 */
+    .section-title {
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    /* 리스트 기본 스타일 제거 */
+    .list-plain {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    
+    /* 최근 검색어 리스트 */ 
+    .recent-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 6px;
+    }
+    /* 최근 검색어 아이템 */
+    .recent-item {
+    border: 1px solid var(--panel-line);
+    border-radius: 10px;
+    padding: 6px 8px;
+    background: var(--surface);
+    display: grid;
+    gap: 6px;
+    }
+    /* 최근 검색어 아이템 호버 효과 */
+    .recent-row {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    }
+    /* 최근 검색어 태그 */
+    .recent-tag {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--brand);
+    background: rgba(255, 130, 21, .08);
+    border-radius: 6px;
+    padding: 2px 6px;
+    }
+    /* 최근 검색어 텍스트 */
+    .recent-text {
+    flex: 1;
+    font-size: 13px;
+    line-height: 1.5;
+    max-height: 1.5em;
+    overflow: hidden;
+    position: relative;
+    }
+    /* 최근 검색어 텍스트가 길 때 말줄임표 */
+    .recent-text[data-expanded="true"] {
+    max-height: none;
+    }
+    /* 최근 검색어 더보기 버튼 */
+    .recent-more {
+    border: none;
+    background: transparent;
+    color: var(--brand);
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    align-self: flex-start;
+    }
+    /* 최근 검색어 다시 실행 버튼 */
+    .recent-rerun {
+    border: none;
+    background: var(--brand);
+    color: #fff;
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 12px;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    }
+    /* 최근 검색어 다시 실행 버튼 호버 효과 */
+    .recent-rerun:hover {
+    background: var(--brand-600);
+    }
+    /* 최근 검색어 다시 실행 버튼 액티브 효과 */
+    .recent-empty {
+    font-size: 12px;
+    color: var(--muted);
+    padding: 8px 6px;
+    }
+    /* 선택된 필터 칩 */
+    .chip {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    padding: 6px 10px;
+    border: 1px solid var(--panel-line);
+    border-radius: 999px;
+    background: var(--surface);
+    margin: 4px 4px 0 0;
+    }
+    /* 칩 내부 버튼 */
+    .chip button {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: var(--muted);
+    }
+    /* 칩 내부 버튼 호버 효과 */
+    .clear-btn {
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 12px;
+    }
+    /* 칩 내부 버튼 호버 효과 */
+    .sidepanel__body {
+    overflow: auto;
+    }
+    /* 검색 결과 리스트 */
+    .results {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    }
+    /* 검색 결과 아이템 */
+    .result-item {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--panel-line);
+    display: grid;
+    gap: 4px;
+    }
+    /* 검색 결과 아이템 호버 효과 */
+    .result-item:hover {
+    background: #fafafa;
+    }
+    /* 다크 모드 검색 결과 아이템 호버 효과 */
+    .result-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    }
+    /* 검색 결과 타이틀 */
+    .result-title {
+    font-weight: 700;
+    font-size: 14px;
+    margin: 0;
+    }
+    /* 검색 결과 타이틀 아이콘 정렬 */
+    .result-title span {
+    vertical-align: middle;
+    }
+    /* 검색 결과 주소 */
+    .result-addr {
+    font-size: 12px;
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    }
+    /* 검색 결과 태그 */
+    .result-tags {
+    display: flex;
+    gap: 6px;
+    margin-top: 4px;
+    flex-wrap: wrap;
+    }
+    /* 검색 결과 태그 스타일 */
+    .pill {
+    font-size: 11px;
+    border-radius: 999px;
+    padding: 2px 8px;
+    border: 1px solid #ffd1b0;
+    color: #c05621;
+    background: #fff7f0;
+    }
+    /* 다크 모드 검색 결과 태그 스타일 */
+    .theme-dark .pill {
+    border-color: #54402f;
+    color: #ffb370;
+    background: #2b241e;
+    }
+    /* 즐겨찾기 버튼 */
+    .fav-btn {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    }
+    /* 즐겨찾기 버튼 활성화 */
+    .fav-btn.active {
+    color: #ffb703;
+    }
+    /* 즐겨찾기 버튼 효과 */
+    .sidepanel__foot { 
+    padding: 8px 12px;
+    border-top: 1px solid var(--panel-line);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    }
+    /* 페이지 네비게이션 */
+    .pager {
+    display: flex;
+    gap: 8px;
+    }
+    
+    /* 페이지 네비게이션 버튼 */
+    .pager button {
+      height: 30px;
+      padding: 0 10px;
+      border: 1px solid var(--panel-line);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--ink);
+      cursor: pointer;
+    }
+    .pager button:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    /* 지도 래퍼 + 지도 DOM */
+    .map-wrap {
+      border-radius: 12px;
+      background: #e9ecef;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, .06);
+      position: relative;
+      min-height: 320px;
+      height: 100%;
+    }
+    #map {
+      width: 100%;
+      height: 100%;
+      min-height: 100%;
+    }
+
+    /* 상태 표시기 */
+    .status-indicator {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 6px;
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, .7);
+    }
+    .status-indicator--pending {    /* 확인 중 */
+      background: #ffd166;
+    }
+    .status-indicator--ok {          /* 사용 가능 */
+      background: #2ecc71;
+    }
+    .status-indicator--none {       /* 가맹 아님 */
+      background: #ef476f;
+    }
+    .status-overlay {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 2px solid #fff;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, .25);
+      background: #ffd166;
+    }
+    .status-overlay.status-ok {
+      background: #2ecc71;
+    }
+    .status-overlay.status-none {
+      background: #ef476f;
+    }
+
+
+    /* 하단 바 */
+    .rectangle {    /* 푸터 */
+      background: var(--surface-2);
+      margin-top: auto;
+      box-shadow: 0 -1px 0 rgba(23, 26, 31, .06) inset;
+    }
+    .rectangle__inner {             /* 푸터 내부 */
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px 16px;
+    }
+    .rectangle .text {              /* 푸터 텍스트 */
+      font-size: 16px;
+      color: #FFCB9D;
+      margin: 0 0 12px;
+    }
+    .theme-dark .rectangle .text {  /* 다크 모드 푸터 텍스트 */
+      color: #ffbb86;
+    }
+    .line {             /* 푸터 구분선 */
+      width: 100%;
+      height: 1px;
+      background: var(--brand);
+      opacity: .7;
+      border: 0;
+      margin: 8px 0 14px;
+    }
+    .rectangle__bar {   /* 푸터 바 */
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* 로고 이미지 */
+    #logoLight,          /* 라이트 모드 로고 */
+    #logoDark {          /* 다크 모드 로고 */
+      max-height: 70px;  /* 높이만 제한 */
+      width: auto;       /* 가로는 비율대로 */
+    }
+    #logoDark{display:none;}    /* 기본적으로 다크 모드 로고 숨김 */
+    .theme-dark #logoLight{display:none;}   /* 다크 모드일 때 라이트 모드 로고 숨김 */
+    .theme-dark #logoDark{display:inline;}  /* 다크 모드일 때 다크 모드 로고 표시 */
+
+    /* 기본 로고 */
+    @media (max-width: 920px) {     /* 화면 너비 920px 이하 */
+      .header-menu {                /* 우측 메뉴 숨김 */
+        display: none;
+      }
+      .layout {                     /* 레이아웃 1열로 변경 */
+        grid-template-columns: 1fr; 
+      }
+      .layout.panel-open {          /* 패널 열려도 1열 유지 */
+        grid-template-columns: 1fr; 
+      }
+      .sidepanel {                  /* 좌측 패널 오버레이 스타일 */
+        display: flex;
+        position: fixed;
+        inset: 64px 0 0 auto;       /* 헤더 아래, 좌우 0 */
+        width: min(92vw, 370px);
+        transform: translateX(-100%);   /* 기본적으로 화면 밖으로 이동 */
+        left: 0;
+        right: auto;
+        transition: transform .25s ease;    
+        z-index: 900;               /* 헤더 위 */
+        visibility: hidden;         /* 기본적으로 숨김 */
+      }
+      .sidepanel.open {             /* 자바스크립트로 열기 */
+        transform: translateX(0);   /* 화면 안으로 이동 */
+        visibility: visible;        /* 보이기 */
+      }
+      .backdrop {                   /* 오버레이 배경 */
+        position: fixed;            
+        inset: 0;
+        background: rgba(0, 0, 0, .25);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity .2s ease;   
+        z-index: 890;               /* 패널 아래 */
+      }
+      .backdrop.show {              /* 자바스크립트로 보이기 */
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .panel-toggle {               /* 패널 토글 버튼 표시 */
+        display: inline-flex;       /* 인라인 플렉스 박스(아이콘 중앙 정렬) */
+      }
+      .textbox {                    /* 검색창 좌측 정렬 */
+        width: 100%;
+      }
+      .textbox input {              /* 검색창 너비 100% */
+        flex: 1;
+        width: auto;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="topbar">
+    <div class="topbar__inner">
+      <button class="panel-toggle" id="togglePanel" aria-label="좌측 패널 열기">☰</button>
+      <img id="logoLight" src="https://raw.githubusercontent.com/AKCU-ryu/OntongDaejeon/main/public/img/logo_bow.png" alt="Ontong 로고">
+      <img id="logoDark"  src="https://raw.githubusercontent.com/AKCU-ryu/OntongDaejeon/main/public/img/logo_bob.png" alt="Ontong 로고">
+
+      <!-- <img class="image" id="logoLight"
+        src="https://raw.githubusercontent.com/AKCU-ryu/OntongDaejeon/main/public/img/logo_bow.png" alt="Ontong 로고">
+      <img class="image" id="logoDark" 
+        src="https://raw.githubusercontent.com/AKCU-ryu/OntongDaejeon/main/public/img/logo_bob.png" alt="Ontong 로고">   -->
+    
+        <!-- HTML: 한 개의 로고만 유지 -->
+      <!-- <a href="javascript:void(0)" class="logo-wrap" style="display:inline-flex;align-items:center;gap:8px;"></a> 
+        <picture> -->
+        <!-- 다크모드일 때 이 소스가 우선 적용 -->
+        <!-- <source media="(prefers-color-scheme: dark)"
+            srcset="https://raw.githubusercontent.com/AKCU-ryu/OntongDaejeon/main/public/img/logo_bob.png"> -->
+        <!-- 기본(라이트) 로고 -->
+        <!-- <img class="image" id="logoIcon"
+            src="https://raw.githubusercontent.com/AKCU-ryu/OntongDaejeon/main/public/img/logo_bow.png" alt="Ontong 로고">
+        </picture> -->
+
+      <!-- <strong id="logoText" style="font-size:18px;line-height:1;">Ontong Daejeon</strong>   -->
+      <div class="text" id="logoText">Ontong Daejeon</div>
+      <nav class="header-menu">
+        <a class="header-menu-item header-menu-item--primary" href="index.html">홈</a>
+        <a class="header-menu-item" href="service.html" target="_blank" rel="noopener noreferrer">서비스</a>
+        <a class="header-menu-item" href="how-to.html" target="_blank" rel="noopener noreferrer">이용방법</a>
+        <a class="header-menu-item" href="qna.html" target="_blank" rel="noopener noreferrer">문의</a>
+      </nav>
+      <div class="textbox" role="search">
+        <input id="q" type="search" placeholder="지역·주소·키워드 (예: 대전 카페)" aria-label="검색어 입력">
+        <button class="btn-search" id="searchBtn" aria-label="검색" title="검색">
+          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2" fill="none"></circle>
+            <path d="M20 20L17 17" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"></path>
+          </svg>
+          검색
+        </button>
+      </div>
+      <button class="theme-toggle" id="themeToggle" aria-label="다크 모드 토글" title="다크 모드">🌙</button>
+    </div>
+  </header>
+
+  <div class="backdrop" id="backdrop" hidden></div>
+  <div class="category-bar">
+    <div class="category-bar__inner">
+      <div class="category-bar__title">카테고리 바로가기</div>
+      <div class="category-scroll" id="categoryTags" aria-label="카카오 카테고리"></div>
+    </div>
+  </div>
+  <div class="layout" id="layout">
+    <aside class="sidepanel" id="panel" aria-label="검색 패널">
+      <div class="tabs">
+        <div class="tab active" id="tabKakao">카카오 장소</div>
+        <div class="tab" id="tabOD">온통대전 가맹점</div>
+      </div>
+
+      <div class="sidepanel__head" id="headKakao">
+        <div class="field">
+          <label class="label" for="cat">카테고리</label>
+          <select class="select" id="cat">
+            <option value="">전체</option>
+            <option value="MT1">대형마트</option>
+            <option value="CS2">편의점</option>
+            <option value="PS3">어린이집/유치원</option>
+            <option value="SC4">학교</option>
+            <option value="AC5">학원</option>
+            <option value="PK6">주차장</option>
+            <option value="OL7">주유소/충전소</option>
+            <option value="SW8">지하철역</option>
+            <option value="BK9">은행</option>
+            <option value="CT1">문화시설</option>
+            <option value="AG2">중개업소</option>
+            <option value="PO3">공공기관</option>
+            <option value="AT4">관광명소</option>
+            <option value="AD5">숙박</option>
+            <option value="FD6">음식점</option>
+            <option value="CE7">카페</option>
+            <option value="HP8">병원</option>
+            <option value="PM9">약국</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="label" for="radius">반경 (m)</label>
+          <select class="select" id="radius">
+            <option value="1000">1,000</option>
+            <option value="2000" selected>2,000</option>
+            <option value="3000">3,000</option>
+            <option value="5000">5,000</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="sidepanel__head" id="headOD" style="display:none;">
+        <div class="field">
+          <label class="label" for="odName">가맹점</label>
+          <input class="input" id="odName" placeholder="예: 스미스비어">
+        </div>
+        <div class="field">
+          <label class="label" for="odAddr">주소</label>
+          <input class="input" id="odAddr" placeholder="예: 둔산대로 157">
+        </div>
+        <div class="field">
+          <label class="label" for="odGu">구</label>
+          <input class="input" id="odGu" placeholder="예: 서구">
+        </div>
+        <div class="field">
+          <label class="label" for="odDong">동</label>
+          <input class="input" id="odDong" placeholder="예: 둔산동">
+        </div>
+        <div class="sidepanel__actions">
+          <button id="btnODSearch" class="btn-fill" type="button">가맹점 검색</button>
+          <button id="btnODReset" class="btn-outline" type="button">초기화</button>
+        </div>
+      </div>
+
+      <div class="panel-sections">
+        <div class="section-title">
+          <span>최근 검색</span>
+          <button class="clear-btn" id="btnClearRecents" title="최근 검색 비우기">지우기</button>
+        </div>
+        <ul class="recent-list" id="recentList" aria-live="polite"></ul>
+
+        <div class="section-title" style="margin-top:4px;">
+          <span>즐겨찾기</span>
+          <button class="clear-btn" id="btnClearFavs" title="즐겨찾기 모두 해제">지우기</button>
+        </div>
+        <ul class="list-plain" id="favList"></ul>
+      </div>
+
+      <div class="sidepanel__body">
+        <ul class="results" id="results"></ul>
+      </div>
+
+      <div class="sidepanel__foot">
+        <div class="pager">
+          <button id="prevPage" type="button">이전</button>
+          <button id="nextPage" type="button">다음</button>
+        </div>
+        <div class="muted" id="pageInfo"></div>
+      </div>
+    </aside>
+    <section class="map-wrap">
+      <div id="map"></div>
+    </section>
+  </div>
+
+  <footer class="rectangle">
+    <div class="rectangle__inner">
+      <p class="text">대전 지역 정보를 쉽고 빠르게.</p>
+      <div class="line"></div>
+      <div class="rectangle__bar">
+        <span>© 2025 Ontong Daejeon. All rights reserved.</span>
+        <span>Made with ♥ in Daejeon</span>
+      </div>
+    </div>
+  </footer>
+
+  <script
+    src="//dapi.kakao.com/v2/maps/sdk.js?appkey=7bdd6f8f52c48f9801f463f213f0d03e&libraries=services,clusterer"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script>
+    (function () {      /* 다크 모드 토글 버튼 */
+      var KEY = 'theme';    /* 로컬스토리지 키 */
+      var btn = document.getElementById('themeToggle'); /* 토글 버튼 */
+      if (!btn) return; /* 버튼이 없으면 종료 */
+      var media = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null; /* 시스템 다크 모드 감지 */
+      var mode = localStorage.getItem(KEY) || 'auto';   /* 저장된 모드 가져오기, 없으면 'auto' */
+      function isDarkActive() {     /* 다크 모드 활성화 여부 판단 */
+        return mode === 'dark' || (mode === 'auto' && media && media.matches);  /* 다크 모드이거나, 자동 모드이고 시스템이 다크 모드일 때 */
+      }
+      function apply() {    /* 다크 모드 적용 */
+        var dark = isDarkActive();  /* 다크 모드 활성화 여부 */
+        document.documentElement.classList.toggle('theme-dark', dark);  /* 다크 모드 클래스 토글 */
+        btn.textContent = dark ? '☀️' : '🌙';
+        var modeKo = (mode === 'auto' ? '자동(시스템 따라감)' : (mode === 'dark' ? '다크' : '라이트')); /* 모드 한글명 */
+        btn.title = modeKo + ' — 클릭해서 모드 변경';   /* 버튼 툴팁 */
+        btn.setAttribute('aria-label', '테마: ' + modeKo);  /* 접근성 라벨 */
+      } 
+      function onSystemChange() { if (mode === 'auto') apply(); }   /* 시스템 다크 모드 변경 시 적용 */
+      function listenSystem(enable) {   /* 시스템 다크 모드 감지 리스너 설정/해제 */
+        if (!media) return; /* 미디어 쿼리 지원 안 하면 종료 */
+        if (enable) {   /* 감지 활성화 */
+          if (media.addEventListener) media.addEventListener('change', onSystemChange); /* 최신 브라우저(크롬, 파이어폭스, 엣지) */
+          else if (media.addListener) media.addListener(onSystemChange);    /* 구형 브라우저(사파리) */
+        } else {
+          if (media.removeEventListener) media.removeEventListener('change', onSystemChange);
+          else if (media.removeListener) media.removeListener(onSystemChange);
+        }
+      }
+      apply();  /* 초기 적용 */
+      listenSystem(mode === 'auto');    /* 자동 모드면 시스템 감지 시작 */
+      btn.addEventListener('click', function () {   /* 버튼 클릭 시 모드 변경 */
+        var wasAuto = (mode === 'auto');        
+        mode = (mode === 'auto') ? 'dark' : (mode === 'dark' ? 'light' : 'auto');   /* auto → dark → light → auto 순환 */
+        localStorage.setItem(KEY, mode);    /* 로컬스토리지에 저장 */
+        if (wasAuto && mode !== 'auto') listenSystem(false);    /* 자동 모드에서 벗어나면 시스템 감지 중지 */
+        else
+        if (!wasAuto && mode === 'auto') listenSystem(true);    /* 자동 모드로 들어가면 시스템 감지 시작 */
+        apply();
+      });
+    })();
+
+    var DAEJEON_HALL = new kakao.maps.LatLng(36.3504, 127.3845);    /* 대전시청 좌표
+    var HOME_LEVEL = 5;                                             /* 초기 지도 확대 레벨 */
+    var map = new kakao.maps.Map(document.getElementById('map'), { center: DAEJEON_HALL, level: HOME_LEVEL });  /* 지도 생성 */
+    var ps = new kakao.maps.services.Places();                  /* 장소 검색 객체 생성 */
+    var geocoder = new kakao.maps.services.Geocoder();          /* 좌표-주소 변환 객체 생성 */
+    var infowindow = new kakao.maps.InfoWindow({ zIndex: 1 });  /* 인포윈도우 생성
+    var markers = [];                                        /* 마커 배열 */
+    var markerMap = {};                                      /* 마커 맵 (키: 장소 고유키, 값: 마커 객체) */
+    var statusOverlays = {};                                /* 상태 오버레이 맵 (키: 장소 고유키, 값: { overlay, el }) */
+    var merchantStatusCache = {};                           /* 가맹점 상태 캐시 (키: 장소 고유키, 값: 'pending' | 'ok' | 'none') */
+    var merchantStatusRequests = {};                        /* 가맹점 상태 요청 중 (키: 장소 고유키, 값: Promise) */
+    var markerImage = new kakao.maps.MarkerImage('https://raw.githubusercontent.com/AKCU-ryu/OntongDaejeon/main/public/img/ontong_pin.png', new kakao.maps.Size(40, 44), {
+      offset: new kakao.maps.Point(20, 44)                  /* 마커 이미지 기준점 (가운데 아래) */
+    });
+    var clusterer = new kakao.maps.MarkerClusterer({        /* 마커 클러스터러 생성 */
+      map: map,
+      averageCenter: true,
+      minLevel: 6,
+      disableClickZoom: false                                /* 클러스터 클릭 시 확대 여부 (false: 확대, true: 확대 안 함) */
+    });
+    var lastPagination = null;                              /* 마지막 페이지네비게이션 객체 */
+    var kakaoPaginationState = null;                        /* 카카오 페이지네비게이션 상태 */
+
+    function placeKey(p) {                                  /* 장소 고유키 생성 함수 */
+      return (p.id ? ('id:' + p.id) : (p.place_name || p.title || '')) + '@' + p.x + ',' + p.y; /* id가 있으면 id 사용, 없으면 이름+좌표 사용 */
+    }
+
+    function attachStatusOverlay(key, marker) {             /* 상태 오버레이 부착 함수 */
+      var el = document.createElement('div');               /* 오버레이 엘리먼트 생성 */
+      el.className = 'status-overlay';                      /* 기본 클래스 */
+      var overlay = new kakao.maps.CustomOverlay({          /* 커스텀 오버레이 생성 */
+        position: marker.getPosition(),                     /* 마커 위치 */
+        content: el,
+        yAnchor: 1.4,
+        xAnchor: 0.5,
+        zIndex: 3
+      });
+      overlay.setMap(map);                                  /* 오버레이 지도에 표시 */
+      statusOverlays[key] = { overlay: overlay, el: el };   /* 상태 오버레이 맵에 저장 */
+      kakao.maps.event.addListener(marker, 'position_changed', function () { overlay.setPosition(marker.getPosition()); }); /* 마커 위치 변경 시 오버레이 위치도 변경 */
+    }
+
+    function updateStatusVisual(key, status) {              /* 상태 시각적 업데이트 함수 */
+      var className = 'status-indicator--pending';
+      var title = '확인 중';
+      if (status === 'ok') { className = 'status-indicator--ok'; title = '온통대전 사용 가능'; }
+      else if (status === 'none') { className = 'status-indicator--none'; title = '온통대전 가맹점 아님'; }
+      document.querySelectorAll('[data-status-key="' + key.replace(/(["\\])/g, '\\$1') + '"]').forEach(function (el) {
+        el.classList.remove('status-indicator--pending', 'status-indicator--ok', 'status-indicator--none');
+        el.classList.add(className);
+        el.setAttribute('title', title);
+      });
+      var overlayEntry = statusOverlays[key];
+      if (overlayEntry) {
+        overlayEntry.el.classList.remove('status-ok', 'status-none');
+        if (status === 'ok') overlayEntry.el.classList.add('status-ok');
+        else if (status === 'none') overlayEntry.el.classList.add('status-none');
+      }
+    }
+
+    // function ensureMerchantStatus(poi){
+    //   var key = placeKey(poi);
+    //   if(merchantStatusCache[key] && merchantStatusCache[key] !== 'pending'){
+    //     updateStatusVisual(key, merchantStatusCache[key]);
+    //     return;
+    //   }
+    //   if(merchantStatusRequests[key]) return;
+    //   merchantStatusCache[key] = 'pending';
+    //   updateStatusVisual(key, 'pending');
+    //   var url = new URL(OD_ENDPOINT);
+    //   url.searchParams.set('page', 1);
+    //   url.searchParams.set('perPage', 1);
+    //   url.searchParams.set('returnType', 'JSON');
+    //   url.searchParams.set('serviceKey', API_KEY);
+    //   if(poi.place_name) url.searchParams.set('cond[가맹점::LIKE]', '%' + poi.place_name + '%');
+    //   var addr = poi.road_address_name || poi.address_name;
+    //   if(addr) url.searchParams.set('cond[주소::LIKE]', '%' + addr.split(' ').slice(0, 4).join(' ') + '%');
+    //   if(poi.phone){
+    //     var digits = String(poi.phone).replace(/[^0-9]/g, '');
+    //     if(digits) url.searchParams.set('cond[전화번호::LIKE]', '%' + digits + '%');
+    //   }
+    //   merchantStatusRequests[key] = fetch(url.toString()).then(function(res){
+    //     if(!res.ok) throw new Error('ODcloud HTTP ' + res.status);
+    //     return res.json();
+    //   }).then(function(data){
+    //     var has = data && Array.isArray(data.data) && data.data.length > 0;
+    //     merchantStatusCache[key] = has ? 'ok' : 'none';
+    //     updateStatusVisual(key, merchantStatusCache[key]);
+    //   }).catch(function(err){
+    //     console.warn('온통대전 가맹점 확인 실패', err);
+    //     merchantStatusCache[key] = 'pending';
+    //     updateStatusVisual(key, 'pending');
+    //   }).finally(function(){ delete merchantStatusRequests[key]; });
+    // }
+
+    function makeMarkerByCoord(poi) {                   /* 좌표로 마커 생성 함수 */
+      var pos = new kakao.maps.LatLng(poi.y, poi.x);    /* 좌표 객체 생성 */
+      var key = placeKey(poi);                          /* 장소 고유키 생성 */
+      var marker = new kakao.maps.Marker({ position: pos, image: markerImage });    /* 마커 생성 */
+      kakao.maps.event.addListener(marker, 'click', function () {       /* 마커 클릭 이벤트 */
+        var html = '<div style="padding:6px 8px;max-width:240px;">'     /* 인포윈도우 내용 */
+          + '<div style="font-weight:700;margin-bottom:2px;">' + (poi.place_name || poi.title || '장소') + '</div>'
+          + (poi.road_address_name ? '<div>' + poi.road_address_name + '</div>' : '')
+          + (poi.address_name ? '<div style="color:#6c757d">' + poi.address_name + '</div>' : '')
+          + (poi.extra_html || '')
+          + '</div>';
+        infowindow.setContent(html);    /* 인포윈도우 내용 설정 */
+        infowindow.open(map, marker);   /* 인포윈도우 표시 */
+      });
+      markers.push(marker);                             /* 마커 배열에 추가 */
+      if (clusterer && clusterer.addMarker) {           /* 클러스터러에 마커 추가 */
+        clusterer.addMarker(marker);
+      }
+      markerMap[key] = marker;                          /* 마커 맵에 추가 */
+      attachStatusOverlay(key, marker);                 /* 상태 오버레이 부착 */
+      ensureMerchantStatus(poi);                        /* 가맹점 상태 확인 */
+      return marker;
+    }
+
+    function clearMarkers() {                     /* 마커 및 오버레이 제거 함수 */
+      if (clusterer) {
+        if (clusterer.getMarkers && clusterer.removeMarkers) {  /* 클러스터러가 getMarkers와 removeMarkers 메서드를 지원하는지 확인 */
+          var olds = clusterer.getMarkers();    /* 기존 마커들 가져오기 */
+          if (olds && olds.length) clusterer.removeMarkers(olds);   /* 기존 마커들 클러스터러에서 제거 */
+        } else if (clusterer.clear) {   
+          clusterer.clear();    /* 클러스터러가 clear 메서드를 지원하면 전체 클리어 */
+        }
+      }
+      markers.forEach(function (m) { m.setMap(null); });    /* 개별 마커 지도에서 제거 */
+      markers = [];
+      markerMap = {};
+      Object.keys(statusOverlays).forEach(function (k) {
+        var entry = statusOverlays[k];
+        if (entry && entry.overlay) entry.overlay.setMap(null);
+      });
+      statusOverlays = {};
+      infowindow.close();
+    }
+
+    function fitBoundsOn(points) {               /* 여러 좌표에 맞게 지도 영역 조정 함수 */
+      if (!points.length) return;
+      var bounds = new kakao.maps.LatLngBounds();
+      points.forEach(function (p) { bounds.extend(p); });
+      map.setBounds(bounds);
+    }
+
+    function makeMarkerByAddress(address, title, extra_html) {  /* 주소로 마커 생성 함수 */
+      geocoder.addressSearch(address, function (result, status) {
+        if (status === kakao.maps.services.Status.OK) {
+          var poi = { x: result[0].x, y: result[0].y, place_name: title, address_name: address, extra_html: extra_html };
+          clearMarkers();
+          var marker = makeMarkerByCoord(poi);
+          map.setLevel(3);
+          map.panTo(marker.getPosition());
+          kakao.maps.event.trigger(marker, 'click');
+        }
+      });
+    }
+
+    var categories = [  /* 카테고리 목록 */
+      { code: 'MT1', name: '대형마트' }, { code: 'CS2', name: '편의점' },
+      { code: 'PS3', name: '어린이집·유치원' }, { code: 'SC4', name: '학교' },
+      { code: 'AC5', name: '학원' }, { code: 'PK6', name: '주차장' },
+      { code: 'OL7', name: '주유소·충전소' }, { code: 'SW8', name: '지하철역' },
+      { code: 'BK9', name: '은행' }, { code: 'CT1', name: '문화시설' },
+      { code: 'AG2', name: '중개업소' }, { code: 'PO3', name: '공공기관' },
+      { code: 'AT4', name: '관광명소' }, { code: 'AD5', name: '숙박' },
+      { code: 'FD6', name: '음식점' }, { code: 'CE7', name: '카페' },
+      { code: 'HP8', name: '병원' }, { code: 'PM9', name: '약국' }
+    ];
+
+    function buildCategoryButtons() {   /* 카테고리 버튼 생성 함수 */
+      var container = document.getElementById('categoryTags');
+      if (!container) return;
+      container.innerHTML = '';
+      categories.forEach(function (cat) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'category-button';
+        btn.textContent = cat.name;
+        btn.dataset.code = cat.code;
+        btn.addEventListener('click', function () {
+          doCategorySearch(cat.code, getSelectedRadius(), cat.name);
+          if (!isMobileView()) openPanel();
+        });
+        container.appendChild(btn);
+      });
+    }
+
+    var resultsEl = document.getElementById('results'); /* 검색 결과 리스트 엘리먼트 */
+    var pageInfo = document.getElementById('pageInfo'); /* 페이지 정보 엘리먼트 */
+    var prevBtn = document.getElementById('prevPage');  /* 이전 페이지 버튼 */
+    var nextBtn = document.getElementById('nextPage');  /* 다음 페이지 버튼 */
+    var odPaginationState = null;
+
+    function renderKakaoList(items) {   /* 카카오 장소 검색 결과 렌더링 함수 */
+      if (!resultsEl) return;
+      resultsEl.innerHTML = '';
+      if (!items || !items.length) {
+        resultsEl.innerHTML = '<li class="result-item"><div class="result-title">검색 결과 없음</div></li>';
+        return;
+      }
+      items.forEach(function (p) {  /* 각 장소에 대해 리스트 아이템 생성 */
+        var key = placeKey(p);
+        var storageKey = 'kakao:' + key;
+        var li = document.createElement('li');
+        li.className = 'result-item';
+        li.dataset.key = key;
+        li.dataset.x = p.x;
+        li.dataset.y = p.y;
+        li.dataset.name = p.place_name || '';
+        li.dataset.road = p.road_address_name || '';
+        li.dataset.addr = p.address_name || '';
+
+        var row = document.createElement('div');
+        row.className = 'result-row';
+
+        var titleBox = document.createElement('div');
+        titleBox.className = 'result-title';
+        var indicator = document.createElement('span');
+        indicator.className = 'status-indicator status-indicator--pending';
+        indicator.dataset.statusKey = key;
+        indicator.title = '확인 중';
+        titleBox.appendChild(indicator);
+        titleBox.appendChild(document.createTextNode(p.place_name || '장소'));
+
+        var favBtn = document.createElement('button');
+        favBtn.type = 'button';
+        favBtn.className = 'fav-btn' + (isFav(storageKey) ? ' active' : '');
+        favBtn.title = '즐겨찾기';
+        favBtn.textContent = '☆';
+
+        favBtn.addEventListener('click', function (ev) {
+          ev.stopPropagation();
+          toggleFav({ key: storageKey, type: 'kakao', title: p.place_name, addr: p.road_address_name || p.address_name, x: p.x, y: p.y });
+          favBtn.classList.toggle('active');
+        });
+
+        row.appendChild(titleBox);
+        row.appendChild(favBtn);
+        li.appendChild(row);
+
+        var addr = document.createElement('div');
+        addr.className = 'result-addr';
+        addr.textContent = p.road_address_name || p.address_name || '';
+        li.appendChild(addr);
+
+        var tags = document.createElement('div');
+        tags.className = 'result-tags';
+        if (p.category_group_code) {
+          var groupPill = document.createElement('span');
+          groupPill.className = 'pill';
+          groupPill.textContent = p.category_group_code;
+          tags.appendChild(groupPill);
+        }
+        if (p.phone) {
+          var phonePill = document.createElement('span');
+          phonePill.className = 'pill';
+          phonePill.textContent = p.phone;
+          tags.appendChild(phonePill);
+        }
+        if (p.distance) {
+          var distancePill = document.createElement('span');
+          distancePill.className = 'pill';
+          distancePill.textContent = p.distance + 'm';
+          tags.appendChild(distancePill);
+        }
+        li.appendChild(tags);
+
+        li.addEventListener('click', function () {
+          var m = markerMap[key];
+          if (!m) {
+            m = makeMarkerByCoord({
+              x: parseFloat(li.dataset.x),
+              y: parseFloat(li.dataset.y),
+              place_name: li.dataset.name,
+              road_address_name: li.dataset.road,
+              address_name: li.dataset.addr
+            });
+          }
+          kakao.maps.event.trigger(m, 'click');
+          map.panTo(m.getPosition());
+          if (window.matchMedia('(max-width: 920px)').matches) closePanel();
+        });
+
+        resultsEl.appendChild(li);
+        updateStatusVisual(key, merchantStatusCache[key] || 'pending');
+        ensureMerchantStatus(p);
+      });
+    }
+
+    function updatePager(pagination) {  /* 페이지네비게이션 업데이트 함수 */
+      kakaoPaginationState = pagination || null;
+      lastPagination = kakaoPaginationState;
+      if (!pagination) {
+        if (pageInfo) pageInfo.textContent = '';
+        if (prevBtn) prevBtn.disabled = true;
+        if (nextBtn) nextBtn.disabled = true;
+        return;
+      }
+      if (pageInfo) pageInfo.textContent = pagination.current + ' / ' + pagination.last;
+      if (prevBtn) prevBtn.disabled = pagination.current <= 1;
+      if (nextBtn) nextBtn.disabled = pagination.current >= pagination.last;
+    }
+
+    /* 페이지 버튼 이벤트 리스너 */
+    if (prevBtn) prevBtn.addEventListener('click', function () { if (lastPagination && lastPagination.gotoPage) lastPagination.gotoPage(lastPagination.current - 1); });
+    if (nextBtn) nextBtn.addEventListener('click', function () { if (lastPagination && lastPagination.gotoPage) lastPagination.gotoPage(lastPagination.current + 1); });
+
+    function renderPlaces(data) {       /* 장소 검색 결과 렌더링 함수 */
+      clearMarkers();
+      var points = [];
+      data.forEach(function (p) {
+        var marker = makeMarkerByCoord(p);
+        points.push(marker.getPosition());
+      });
+      if (points.length) fitBoundsOn(points);
+      renderKakaoList(data);
+    }
+
+    function handlePlacesResponse(data, status, pagination, recentMeta) {   /* 장소 검색 응답 처리 함수 */
+      if (status !== kakao.maps.services.Status.OK) {
+        renderKakaoList([]);
+        clearMarkers();
+        updatePager(null);
+        if (status === kakao.maps.services.Status.ZERO_RESULT) {
+          alert('검색 결과가 없습니다.');
+        } else {
+          alert('검색 오류가 발생했습니다.');
+        }
+        return;
+      }
+      renderPlaces(data);
+      updatePager({
+        current: pagination.current,
+        last: pagination.last,
+        gotoPage: function (page) { pagination.gotoPage(page); }
+      });
+      if (recentMeta) {
+        if (recentMeta.type === 'category') {
+          pushRecent({ type: 'kakao', mode: 'category', q: recentMeta.label, category: recentMeta.category, radius: recentMeta.radius });
+        } else {
+          pushRecent({ type: 'kakao', mode: 'keyword', q: recentMeta.label });
+        }
+      }
+    }
+
+    function getSelectedCategory() {    /* 선택된 카테고리 코드 가져오기 */
+      var el = document.getElementById('cat');
+      return el ? el.value : '';
+    }
+
+    function getSelectedRadius() {      /* 선택된 반경 값 가져오기 */
+      var el = document.getElementById('radius');
+      return el ? parseInt(el.value, 10) || 2000 : 2000;
+    }
+
+    function doKeywordSearch(q) {       /* 키워드 검색 함수 */
+      if (!q || !q.trim()) return;
+      switchTab('kakao');
+      var keyword = q.trim();
+      ps.keywordSearch(keyword, function (data, status, pagination) {
+        handlePlacesResponse(data, status, pagination, { type: 'keyword', label: keyword });
+      }, { location: map.getCenter() });
+    }
+
+    function doCategorySearch(code, radius, label) {    /* 카테고리 검색 함수 */
+      var selected = code || getSelectedCategory();
+      var effectiveLabel = label || (categories.find(function (c) { return c.code === selected; }) || {}).name || '카테고리';
+      switchTab('kakao');
+      if (!selected) {
+        var input = document.getElementById('q');
+        doKeywordSearch(input && input.value ? input.value : '대전 맛집');
+        return;
+      }
+      var dist = parseInt(radius || getSelectedRadius(), 10) || 2000;
+      ps.categorySearch(selected, function (data, status, pagination) {
+        handlePlacesResponse(data, status, pagination, { type: 'category', label: effectiveLabel + ' / ' + dist + 'm', category: selected, radius: dist });
+      }, {
+        location: map.getCenter(),
+        radius: dist,
+        sort: kakao.maps.services.SortBy.DISTANCE
+      });
+    }
+
+    var panel = document.getElementById('panel');           /* 사이드패널 엘리먼트 */
+    var layoutEl = document.getElementById('layout');       /* 레이아웃 엘리먼트 */
+    var backdrop = document.getElementById('backdrop');     /* 백드롭 엘리먼트 */
+    var toggleBtn = document.getElementById('togglePanel'); /* 패널 토글 버튼 */
+    function isMobileView() { return window.matchMedia && window.matchMedia('(max-width: 920px)').matches; }    /* 모바일 뷰 여부 판단 함수 */
+    function openPanel() {  /* 패널 열기 함수 */
+      if (panel) panel.classList.add('open');
+      if (layoutEl) layoutEl.classList.add('panel-open');
+      if (backdrop) {
+        if (isMobileView()) {
+          backdrop.hidden = false;
+          backdrop.classList.add('show');
+        } else {
+          backdrop.classList.remove('show');
+          backdrop.hidden = true;
+        }
+      }
+      refreshMapCenter();
+    }
+    function closePanel() { /* 패널 닫기 함수 */
+      if (panel) panel.classList.remove('open');
+      if (layoutEl) layoutEl.classList.remove('panel-open');
+      if (backdrop) {
+        backdrop.classList.remove('show');
+        if (isMobileView()) {
+          setTimeout(function () { backdrop.hidden = true; }, 200);
+        } else {
+          backdrop.hidden = true;
+        }
+      }
+      refreshMapCenter();
+    }
+    if (toggleBtn) toggleBtn.addEventListener('click', function () { panel.classList.contains('open') ? closePanel() : openPanel(); });
+    if (backdrop) backdrop.addEventListener('click', closePanel);   /* 백드롭 클릭 시 패널 닫기 */
+
+    var resizeTimer;                           /* 리사이즈 타이머 */
+    function refreshMapCenter() {               /* 지도 중심 재조정 함수 */
+      var center = map.getCenter();
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(function () {
+        map.relayout();
+        map.setCenter(center);
+      }, 120);
+    }
+    window.addEventListener('resize', refreshMapCenter);    /* 윈도우 리사이즈 시 지도 중심 재조정 */
+
+    var tabKakao = document.getElementById('tabKakao');     /* 카카오 탭 버튼 */
+    var tabOD = document.getElementById('tabOD');           /* 온통대전 탭 버튼 */
+    var headKakao = document.getElementById('headKakao');   /* 카카오 헤더 */
+    var headOD = document.getElementById('headOD');         /* 온통대전 헤더 */
+    function switchTab(tab) {                               /* 탭 전환 함수 */
+      if (tab === 'kakao') {
+        if (tabKakao) tabKakao.classList.add('active');
+        if (tabOD) tabOD.classList.remove('active');
+        if (headKakao) headKakao.style.display = 'grid';
+        if (headOD) headOD.style.display = 'none';
+        updatePager(kakaoPaginationState);
+      } else {
+        if (tabOD) tabOD.classList.add('active');
+        if (tabKakao) tabKakao.classList.remove('active');
+        if (headOD) headOD.style.display = 'grid';
+        if (headKakao) headKakao.style.display = 'none';
+        renderODPager();
+      }
+    }
+    if (tabKakao) tabKakao.addEventListener('click', function () { switchTab('kakao'); });  /* 탭 버튼 이벤트 리스너 */
+    if (tabOD) tabOD.addEventListener('click', function () { switchTab('od'); });           /* 탭 버튼 이벤트 리스너 */
+
+    var LS_RECENTS = 'ont_recent_v1';   /* 최근 검색어 로컬스토리지 키 */
+    var LS_FAVS = 'ont_fav_v1';         /* 즐겨찾기 로컬스토리지 키 */
+    var recentListEl = document.getElementById('recentList');   /* 최근 검색어 리스트 엘리먼트 */
+    var favListEl = document.getElementById('favList');         /* 즐겨찾기 리스트 엘리먼트 */
+
+    function getRecents() { try { return JSON.parse(localStorage.getItem(LS_RECENTS) || '[]'); } catch (e) { return []; } }     /* 최근 검색어 배열 가져오기 */
+    function setRecents(arr) { localStorage.setItem(LS_RECENTS, JSON.stringify(arr.slice(0, 5))); }     /* 최대 5개 저장 */
+    function pushRecent(entry) {    /* 최근 검색어 추가 함수 */
+      var arr = getRecents().filter(function (e) { return JSON.stringify({ type: e.type, mode: e.mode, q: e.q, category: e.category, radius: e.radius, cond: e.cond }) !== JSON.stringify({ type: entry.type, mode: entry.mode, q: entry.q, category: entry.category, radius: entry.radius, cond: entry.cond }); });
+      arr.unshift({
+        type: entry.type,
+        mode: entry.mode,
+        q: entry.q,
+        category: entry.category,
+        radius: entry.radius,
+        cond: entry.cond ? { name: entry.cond.name || '', addr: entry.cond.addr || '', gu: entry.cond.gu || '', dong: entry.cond.dong || '' } : undefined,
+        ts: Date.now()
+      });
+      setRecents(arr);
+      renderRecents();
+    }
+    function getFavs() { try { return JSON.parse(localStorage.getItem(LS_FAVS) || '[]'); } catch (e) { return []; } }   /* 즐겨찾기 배열 가져오기 */
+    function setFavs(arr) { localStorage.setItem(LS_FAVS, JSON.stringify(arr.slice(0, 100))); } /* 최대 100개 저장 */
+    function isFav(key) { return getFavs().some(function (f) { return f.key === key; }); }      /* 즐겨찾기 여부 확인 함수 */
+    function toggleFav(item) {              /* 즐겨찾기 토글 함수 */
+      var favs = getFavs();
+      var idx = favs.findIndex(function (f) { return f.key === item.key; });
+      if (idx >= 0) favs.splice(idx, 1); else favs.unshift(item);
+      setFavs(favs);
+      renderFavs();
+    }
+    function renderRecents() {              /* 최근 검색어 렌더링 함수 */
+      if (!recentListEl) return;
+      var arr = getRecents();
+      if (!arr.length) {
+        recentListEl.innerHTML = '<li class="recent-empty">최근 검색 없음</li>';
+        return;
+      }
+      recentListEl.innerHTML = '';
+      arr.slice(0, 5).forEach(function (e) {
+        var li = document.createElement('li');
+        li.className = 'recent-item';
+
+        var row = document.createElement('div');
+        row.className = 'recent-row';
+
+        var tag = document.createElement('span');
+        tag.className = 'recent-tag';
+        tag.textContent = e.type === 'kakao' ? (e.mode === 'category' ? '카테고리' : '키워드') : '가맹점';
+
+        var text = document.createElement('div');
+        text.className = 'recent-text';
+        var content = '';
+        if (e.type === 'kakao') {
+          if (e.mode === 'category') {
+            content = e.q || '카카오 카테고리 검색';
+          } else {
+            content = e.q || '카카오 검색';
+          }
+        } else {
+          var c = e.cond || {};
+          content = [c.name, c.addr, c.gu, c.dong].filter(Boolean).join(' · ') || '가맹점 검색';
+        }
+        text.textContent = content;
+        text.dataset.expanded = 'false';
+
+        var rerun = document.createElement('button');
+        rerun.type = 'button';
+        rerun.className = 'recent-rerun';
+        rerun.textContent = '↻';
+        rerun.title = '다시 검색';
+
+        rerun.addEventListener('click', function () {
+          if (e.type === 'kakao') {
+            if (e.mode === 'category') {
+              doCategorySearch(e.category, e.radius, e.q);
+            } else {
+              doKeywordSearch(e.q);
+            }
+          } else {
+            doODSearch(e.cond || {}, 1);
+          }
+        });
+
+        row.appendChild(tag);
+        row.appendChild(text);
+        row.appendChild(rerun);
+        li.appendChild(row);
+
+        var more = document.createElement('button');
+        more.type = 'button';
+        more.className = 'recent-more';
+        more.textContent = '더보기';
+        more.hidden = true;
+        more.addEventListener('click', function () {
+          var expanded = text.dataset.expanded === 'true';
+          text.dataset.expanded = expanded ? 'false' : 'true';
+          more.textContent = expanded ? '더보기' : '접기';
+        });
+
+        li.appendChild(more);
+        recentListEl.appendChild(li);
+        
+        requestAnimationFrame(function () {
+          if (text.scrollHeight > text.clientHeight + 2) { 
+            more.hidden = false;
+          }
+        });
+      });
+    }
+    function renderFavs() {                 /* 즐겨찾기 렌더링 함수 */
+      if (!favListEl) return;
+      var favs = getFavs();
+      favListEl.innerHTML = '';
+      if (!favs.length) {
+        favListEl.innerHTML = '<li style="font-size:12px;color:var(--muted);">즐겨찾기 없음</li>';
+        return;
+      }
+      favs.forEach(function (f) {
+        var li = document.createElement('li');
+        li.className = 'result-item';
+        li.innerHTML =
+          '<div class="result-row">'
+          + '<div class="result-title">' + (f.title || '항목') + '</div>'
+          + '<button class="fav-btn active" title="즐겨찾기 해제">⭐</button>'
+          + '</div>'
+          + '<div class="result-addr">' + (f.addr || '') + '</div>'
+          + '<div class="result-tags"><span class="pill">' + (f.type || '').toUpperCase() + '</span></div>';
+        li.querySelector('.fav-btn').addEventListener('click', function (ev) {
+          ev.stopPropagation();
+          toggleFav(f);
+        });
+        li.addEventListener('click', function (ev) {
+          if (ev.target.classList.contains('fav-btn')) return;
+          if (f.x && f.y) {
+            clearMarkers();
+            var marker = makeMarkerByCoord({ x: f.x, y: f.y, place_name: f.title, address_name: f.addr });
+            map.setLevel(3);
+            map.panTo(marker.getPosition());
+            kakao.maps.event.trigger(marker, 'click');
+          } else if (f.addr) {
+            makeMarkerByAddress(f.addr, f.title);
+          }
+        });
+        favListEl.appendChild(li);
+      });
+    }
+    var btnClearRecents = document.getElementById('btnClearRecents');   /* 최근 검색어 초기화 버튼 */
+    var btnClearFavs = document.getElementById('btnClearFavs');         /* 최근 검색어 및 즐겨찾기 초기화 버튼 */
+    if (btnClearRecents) btnClearRecents.addEventListener('click', function () { localStorage.removeItem(LS_RECENTS); renderRecents(); });
+    if (btnClearFavs) btnClearFavs.addEventListener('click', function () { localStorage.removeItem(LS_FAVS); renderFavs(); });
+    renderRecents();                 /* 최근 검색어 렌더링 */
+    renderFavs();                    /* 최근 검색어 및 즐겨찾기 렌더링 */
+    buildCategoryButtons();          /* 카테고리 버튼 생성 */
+
+    var searchBtn = document.getElementById('searchBtn');   /* 검색 버튼 엘리먼트 */
+    if (searchBtn) {                        /* 검색 버튼 클릭 이벤트 */ 
+      function triggerRipple(btn) {         /* 버튼 리플 이펙트 트리거 함수 */
+        btn.classList.remove('ripple');
+        requestAnimationFrame(function () { btn.classList.add('ripple'); });    /* 리플 클래스 재적용으로 애니메이션 재실행 */
+      }
+      searchBtn.addEventListener('click', function (e) {    /* 클릭 이벤트 */
+        e.preventDefault();
+        triggerRipple(searchBtn);
+        doKeywordSearch(document.getElementById('q') ? document.getElementById('q').value : '');    /* 검색 실행 */
+      });
+    }
+    var qInput = document.getElementById('q');              /* 검색어 입력창 엘리먼트 */
+    if (qInput) {                                           /* 검색어 입력창 엔터키 이벤트 */
+      qInput.addEventListener('keydown', function (e) {     /* 키다운 이벤트 */
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          doKeywordSearch(e.target.value);
+        }
+      });
+    }
+
+    var catSelect = document.getElementById('cat');         /* 카테고리 선택 엘리먼트 */
+    var radiusSelect = document.getElementById('radius');   /* 카테고리 및 반경 선택 엘리먼트 */
+    function handleCategoryChange() {
+      doCategorySearch(catSelect ? catSelect.value : '', radiusSelect ? radiusSelect.value : undefined);
+    }
+    if (catSelect) catSelect.addEventListener('change', handleCategoryChange);          /* 카테고리 변경 시 검색 */
+    if (radiusSelect) radiusSelect.addEventListener('change', handleCategoryChange);    /* 반경 변경 시 검색 */
+
+    const CSV_URLS = {  // CSV 파일 URL들
+      applied: 'https://raw.githubusercontent.com/AKCU-ryu/OntongDaejeon/main/대전광역시_온통대전%20신청%20가맹점%20목록_20211130.csv',
+      monthly: 'https://raw.githubusercontent.com/AKCU-ryu/OntongDaejeon/main/대전광역시_온통대전%20월별%20업종별%20가맹점%20수_20210930.csv'
+    };
+
+    let appliedData = [];
+    let monthlyData = [];
+    // async function loadCsv(url){
+    //   const res = await fetch(url);
+    //   const csvText = await res.text();
+    //   const parsed = Papa.parse(csvText, {
+    //     header: true,
+    //     skipEmptyLines: true
+    //   });
+    //   return parsed.data;
+    // }
+    async function loadCsv(url) {       // CSV 로드 및 파싱 함수 (EUC-KR / CP949 디코딩 포함)
+      const res = await fetch(url);
+      // EUC-KR / CP949 디코딩
+      const buffer = await res.arrayBuffer();
+      const decoder = new TextDecoder("euc-kr"); // 또는 "cp949"
+      const csvText = decoder.decode(buffer);
+
+      const parsed = Papa.parse(csvText, {
+        header: true,
+        skipEmptyLines: true
+      });
+      return parsed.data;
+    }
+
+
+    // 🚀 두 파일 병렬 로드
+    async function init() {             // 초기화 함수
+      try {
+        const [applied, monthly] = await Promise.all([
+          loadCsv(CSV_URLS.applied),
+          loadCsv(CSV_URLS.monthly)
+        ]);
+
+        appliedData = applied;
+        monthlyData = monthly;
+
+        console.log('✅ 신청 가맹점', appliedData.length);
+        console.log('✅ 월별 업종별', monthlyData.length);
+
+        renderAppliedTable();
+        renderMonthlyChart();
+      } catch (err) {
+        console.error('CSV 로드 실패:', err);
+      }
+    }
+    function renderAppliedTable() {     // 신청 가맹점 테이블 렌더링 함수
+      // 신청 가맹점 데이터를 테이블이나 지도에 표시
+      console.log(appliedData.slice(0, 5));
+    }
+    function renderMonthlyChart() {     // 월별 업종별 차트 렌더링 함수
+      // 월별 업종별 데이터를 차트로 그리기
+      console.log(monthlyData.slice(0, 5));
+    }
+    // 시작
+    init();
+
+    var OD_ENDPOINT = 'https://api.odcloud.kr/api/15097203/v1/uddi:fc30c6ac-23a9-4d0b-95dd-f0e4f2ef3115';
+    var API_KEY = 'QpWPp9txkmGnVhhlXoHPY8ifB9x/4qxyqYeCH7jFzB82up9cr2dCbJI7veH8NjbhVOzcBFRTKDMgpWQmA/bf2A==';
+    var odPerPage = 20;
+    var odPage = 1;
+    var odTotal = 0;
+    var odInputs = {    /* ODcloud 조건 입력 엘리먼트 */
+      name: document.getElementById('odName'),
+      addr: document.getElementById('odAddr'),
+      gu: document.getElementById('odGu'),
+      dong: document.getElementById('odDong')
+    };
+
+    function odCondParams(cond) {   /* ODcloud 조건 파라미터 생성 함수 */
+      var params = {};
+      if (cond.name) params['cond[가맹점::LIKE]'] = '%' + cond.name + '%';
+      if (cond.addr) params['cond[주소::LIKE]'] = '%' + cond.addr + '%';
+      if (cond.gu) params['cond[구::EQ]'] = cond.gu;
+      if (cond.dong) params['cond[동::EQ]'] = cond.dong;
+      return params;
+    }
+
+    function fetchOD(cond, page) {  /* ODcloud 데이터 페칭 함수 */
+      var url = new URL(OD_ENDPOINT);
+      url.searchParams.set('page', page);
+      url.searchParams.set('perPage', odPerPage);
+      url.searchParams.set('returnType', 'JSON');
+      url.searchParams.set('serviceKey', API_KEY);
+      var extra = odCondParams(cond);
+      Object.keys(extra).forEach(function (k) { url.searchParams.set(k, extra[k]); });
+      return fetch(url.toString()).then(function (res) {
+        if (!res.ok) throw new Error('ODcloud HTTP ' + res.status);
+        return res.json();
+      });
+    }
+
+    function renderODList(rows) {   /* ODcloud 결과 리스트 렌더링 함수 */
+      if (!resultsEl) return;
+      resultsEl.innerHTML = '';
+      if (!rows || !rows.length) {
+        resultsEl.innerHTML = '<li class="result-item"><div class="result-title">검색 결과 없음</div></li>';
+        return;
+      }
+      rows.forEach(function (r) {
+        var title = r['가맹점'] || '가맹점';
+        var addr = r['주소'] || '';
+        var gu = r['구'] || '';
+        var dong = r['동'] || '';
+        var key = 'od:' + title + ':' + addr;
+        var li = document.createElement('li');
+        li.className = 'result-item';
+        li.innerHTML =
+          '<div class="result-row">'
+          + '<div class="result-title">' + title + '</div>'
+          + '<button class="fav-btn' + (isFav(key) ? ' active' : '') + '" title="즐겨찾기">⭐</button>'
+          + '</div>'
+          + '<div class="result-addr">' + addr + '</div>'
+          + '<div class="result-tags">'
+          + (gu ? '<span class="pill">' + gu + '</span>' : '')
+          + (dong ? '<span class="pill">' + dong + '</span>' : '')
+          + '</div>';
+        li.querySelector('.fav-btn').addEventListener('click', function (ev) {
+          ev.stopPropagation();
+          toggleFav({ key: key, type: 'od', title: title, addr: addr });
+          this.classList.toggle('active');
+        });
+        li.addEventListener('click', function () {
+          switchTab('kakao');
+          makeMarkerByAddress(addr, title, '<div style="margin-top:4px;color:#6c757d">' + (gu + ' ' + dong).trim() + '</div>');
+        });
+        resultsEl.appendChild(li);
+      });
+    }
+
+    function updateODPager(total, pageNow) {    /* ODcloud 페이지네비게이션 업데이트 함수 */
+      odTotal = total;
+      odPage = pageNow;
+      var last = total > 0 ? Math.ceil(total / odPerPage) : pageNow;
+      odPaginationState = {
+        type: 'od',
+        current: pageNow,
+        last: last,
+        total: total,
+        gotoPage: function (n) { doODSearch(readODCond(), n); }
+      };
+      renderODPager();
+    }
+
+    function renderODPager() {      /* ODcloud 페이지네비게이션 렌더링 함수 */
+      if (!odPaginationState) {
+        if (pageInfo) pageInfo.textContent = '';
+        if (prevBtn) prevBtn.disabled = true;
+        if (nextBtn) nextBtn.disabled = true;
+        lastPagination = null;
+        return;
+      }
+      if (pageInfo) pageInfo.textContent = odPaginationState.current + ' / ' + odPaginationState.last + ' (총 ' + odPaginationState.total.toLocaleString() + '건)';
+      if (prevBtn) prevBtn.disabled = odPaginationState.current <= 1;
+      if (nextBtn) nextBtn.disabled = odPaginationState.current >= odPaginationState.last;
+      lastPagination = odPaginationState;
+    }
+
+    function readODCond() {         /* ODcloud 조건 읽기 함수 */
+      return {
+        name: odInputs.name ? odInputs.name.value.trim() : '',
+        addr: odInputs.addr ? odInputs.addr.value.trim() : '',
+        gu: odInputs.gu ? odInputs.gu.value.trim() : '',
+        dong: odInputs.dong ? odInputs.dong.value.trim() : ''
+      };
+    }
+
+    function doODSearch(cond, page) {   /* ODcloud 검색 함수 */
+      switchTab('od');
+      var targetPage = page || 1;
+      fetchOD(cond, targetPage).then(function (data) {
+        var rows = (data && data.data) ? data.data : [];
+        var total = (data && typeof data.totalCount === 'number') ? data.totalCount : rows.length;
+        renderODList(rows);
+        updateODPager(total, targetPage);
+        pushRecent({ type: 'od', cond: cond });
+      }).catch(function (err) {
+        console.error(err);
+        alert('ODcloud 조회 오류: ' + err.message);
+        renderODList([]);
+        updateODPager(0, 1);
+      });
+    }
+
+    var btnODSearch = document.getElementById('btnODSearch');
+    var btnODReset = document.getElementById('btnODReset');
+    if (btnODSearch) btnODSearch.addEventListener('click', function () { doODSearch(readODCond(), 1); });
+    if (btnODReset) btnODReset.addEventListener('click', function () {
+      Object.keys(odInputs).forEach(function (k) { if (odInputs[k]) odInputs[k].value = ''; });
+      doODSearch({}, 1);
+    });
+
+    function goHome() { /* 홈으로 이동 함수 */
+      map.setLevel(HOME_LEVEL);
+      map.setCenter(DAEJEON_HALL);
+      clearMarkers();
+      infowindow.close();
+    }
+    // var logoIcon = document.getElementById('logoIcon');
+    var logoLight  = document.getElementById('logoLight');  /* 라이트 모드 */
+    var logoDark = document.getElementById('logoDark');     /* 다크 모드 */
+    var logoText = document.getElementById('logoText');     /* 로고 텍스트 */
+    if (logoLight) logoLight.addEventListener('click', goHome); /* 라이트모드일 때 로고 클릭 시 홈으로 이동 */
+    if (logoDark) logoDark.addEventListener('click', goHome);   /* 다크모드일 때 로고 클릭 시 홈으로 이동 */
+    if (logoText) logoText.addEventListener('click', goHome);   /* 텍스트 클릭 시 홈으로 이동 */
+
+    window.addEventListener('load', function () {   /* 페이지 로드 시 초기 검색 */
+      switchTab('kakao');
+      doCategorySearch('CE7', 2000, '카페');
+    });
+
+    function isOntongMerchantByCSV(poi) {   /* CSV 기반 가맹점 확인 함수 */
+      if (!appliedData || !appliedData.length) return false;            // CSV 데이터 없으면 false
+      const name = poi.place_name ? poi.place_name.trim() : '';         // 가맹점명
+      const addr = poi.road_address_name || poi.address_name || '';     // 주소
+      // 주소에서 '구' 추출 (예: 서구, 유성구 등)
+      const guMatch = addr.match(/(\S+구)/);    
+      const gu = guMatch ? guMatch[1] : '';
+
+      return appliedData.some(row => {                      // CSV 데이터에서 조건에 맞는 행이 있는지 확인
+        const csvName = (row['가맹점'] || '').trim();       // CSV의 가맹점명
+        const csvGu = (row['구'] || '').trim();             // CSV의 구
+
+        // 조건: (가맹점명이 같음) OR (가맹점명 + 구가 같음)
+        return (
+          (csvName && csvName === name) ||
+          (csvName && csvGu && csvName === name && csvGu === gu)
+        );
+      });
+    }
+    function ensureMerchantStatus(poi) {    /* 가맹점 상태 확인 함수 */
+      var key = placeKey(poi);
+      // 1️⃣ CSV 기반 확인 먼저
+      if (isOntongMerchantByCSV(poi)) {     // CSV에서 가맹점으로 확인되면 바로 'ok' 처리
+        merchantStatusCache[key] = 'ok';
+        updateStatusVisual(key, 'ok');
+        return;
+      }
+
+      // 2️⃣ 기존 캐시 확인
+      if (merchantStatusCache[key] && merchantStatusCache[key] !== 'pending') {
+        updateStatusVisual(key, merchantStatusCache[key]);
+        return;
+      }
+      if (merchantStatusRequests[key]) return;  // 이미 요청 중이면 중복 요청 방지
+
+      // 3️⃣ ODcloud API 확인 (기존 코드 유지)
+      merchantStatusCache[key] = 'pending';
+      updateStatusVisual(key, 'pending');
+      var url = new URL(OD_ENDPOINT);
+      url.searchParams.set('page', 1);
+      url.searchParams.set('perPage', 1);
+      url.searchParams.set('returnType', 'JSON');
+      url.searchParams.set('serviceKey', API_KEY);
+      if (poi.place_name) url.searchParams.set('cond[가맹점::LIKE]', '%' + poi.place_name + '%');   // 가맹점명 조건
+      var addr = poi.road_address_name || poi.address_name;                                         // 주소
+      if (addr) url.searchParams.set('cond[주소::LIKE]', '%' + addr.split(' ').slice(0, 4).join(' ') + '%');    // 앞 4단어까지
+      if (poi.phone) {
+        var digits = String(poi.phone).replace(/[^0-9]/g, '');                          // 숫자만 추출
+        if (digits) url.searchParams.set('cond[전화번호::LIKE]', '%' + digits + '%');   // 전화번호 조건 추가
+      }
+      merchantStatusRequests[key] = fetch(url.toString()).then(function (res) {     // API 요청
+        if (!res.ok) throw new Error('ODcloud HTTP ' + res.status);         // HTTP 오류 시 예외 발생
+        return res.json();                                                  // JSON 파싱
+      }).then(function (data) {                                             // 응답 데이터 처리
+        var has = data && Array.isArray(data.data) && data.data.length > 0; // 결과 있으면 true
+        merchantStatusCache[key] = has ? 'ok' : 'none';
+        updateStatusVisual(key, merchantStatusCache[key]);                  // 상태 업데이트
+      }).catch(function (err) {
+        console.warn('온통대전 가맹점 확인 실패', err);                       // 오류 시에도 'pending' 유지
+        merchantStatusCache[key] = 'pending';
+        updateStatusVisual(key, 'pending');
+      }).finally(function () { delete merchantStatusRequests[key]; });      // 요청 완료 후 상태 정리
+    }
+
+    (function(){
+    function canScroll(el, dy){
+      if(!el) return false;
+      var atTop = el.scrollTop <= 0;
+      var atBottom = Math.ceil(el.scrollTop + el.clientHeight) >= el.scrollHeight;
+      if(dy < 0) return !atTop;
+      if(dy > 0) return !atBottom;
+      return false;
+    }
+    function onWheel(e){
+      if(e.ctrlKey) return;
+      var el = e.target && e.target.closest ? e.target.closest('.panel-scroll.wheel-scroll') : null;
+      if(!el) return;
+      if(canScroll(el, e.deltaY)){
+        e.preventDefault();
+        el.scrollTop += e.deltaY * 1.05;
+      }
+    }
+    window.addEventListener('wheel', onWheel, {passive:false});
+  })();
+
+  </script>
+</body>
+
+</html>

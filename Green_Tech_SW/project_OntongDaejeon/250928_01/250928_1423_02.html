@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="ko" data-bs-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <title>온통대전 가맹점 검색 (샘플 단일파일)</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <!-- Bootstrap 5.3 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Kakao Map SDK -->
+  <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=7bdd6f8f52c48f9801f463f213f0d03e&libraries=services"></script>
+  <style>
+    :root { color-scheme: dark; }
+    body{ background:#0b0c0f; }
+    .topbar{ background:#ff7a00; height:64px; }
+    .topbar .form-control{ background:#1b1e23; border-color:#2a2f36; color:#eaecef; }
+    .topbar .btn{ border-color:#2a2f36; }
+    #map{ width:100%; height:calc(100dvh - 64px); }
+    /* 진입 모션 */
+    .fade-in{ opacity:0; transform:translateY(-24px); animation:fadeIn .6s ease forwards; }
+    .slide-in-left{ opacity:0; transform:translateX(-24px); animation:inL .5s .1s ease forwards; }
+    .slide-in-right{ opacity:0; transform:translateX(24px); animation:inR .5s .1s ease forwards; }
+    .slide-in-up{ opacity:0; transform:translateY(24px); animation:inU .5s .2s ease forwards; }
+    @keyframes fadeIn { to{opacity:1; transform:none} }
+    @keyframes inL   { to{opacity:1; transform:none} }
+    @keyframes inR   { to{opacity:1; transform:none} }
+    @keyframes inU   { to{opacity:1; transform:none} }
+    /* 검색창 폭 */
+    .w-gu{ width:16rem; max-width:32vw; }
+    .w-dong{ width:28rem; max-width:50vw; }
+    /* 간단 로고(대체) */
+    .logo-dot{ width:36px; height:36px; border-radius:999px; background:#111; position:relative; }
+    .logo-dot::after{ content:":D"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-weight:700; color:#ff7a00; }
+    /* 토스트(우상단) */
+    #toastWrap{ position:fixed; top:76px; right:12px; z-index:1080; }
+    /* 토글 버튼 UI(선택) */
+    .btn-zoom{ border-color:#2a2f36; }
+  </style>
+</head>
+<body>
+  <!-- 상단 오렌지 바: 좌 메뉴, 중앙 검색, 우 로고 -->
+  <div class="topbar d-flex align-items-center px-2 px-md-3 fade-in">
+    <!-- 좌측: 메뉴버튼 (오프캔버스) -->
+    <button class="btn btn-dark me-2 slide-in-left" data-bs-toggle="offcanvas" data-bs-target="#menuCanvas" aria-controls="menuCanvas">☰ 메뉴</button>
+
+    <!-- 중앙: 검색 폼 -->
+    <form id="searchForm" class="d-flex align-items-center gap-2 mx-auto w-100 justify-content-center">
+      <input id="qSe" class="form-control w-gu slide-in-left" placeholder="구 (예: 동구)" autocomplete="off">
+      <input id="qDong" class="form-control w-dong slide-in-right" placeholder="동 (예: 대동)" autocomplete="off">
+      <button id="searchBtn" class="btn btn-dark slide-in-right" type="submit">검색</button>
+    </form>
+
+    <!-- 우측: 로고 -->
+    <div class="ms-auto slide-in-right d-flex align-items-center gap-2">
+      <!-- 커스텀 확대/축소 버튼 -->
+      <button id="btnZoomOut" class="btn btn-dark btn-zoom">−</button>
+      <button id="btnZoomIn"  class="btn btn-dark btn-zoom">＋</button>
+      <div class="logo-dot" title="Ontong:D"></div>
+    </div>
+  </div>
+
+  <!-- 지도 -->
+  <div id="map" class="slide-in-up"></div>
+
+  <!-- 오프캔버스: 메뉴 -->
+  <div class="offcanvas offcanvas-start text-bg-dark" tabindex="-1" id="menuCanvas" aria-labelledby="menuCanvasLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="menuCanvasLabel">메뉴</h5>
+      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body small">
+      <ul class="list-unstyled">
+        <li class="mb-2"><button id="goHome" class="badge text-bg-secondary border-0">홈</button></li>
+        <li class="mb-2"><button id="goMyPos" class="badge text-bg-secondary border-0">내 위치로</button></li>
+        <li class="mb-2"><span class="badge text-bg-secondary">필터(준비중)</span></li>
+        <li class="mb-2"><span class="badge text-bg-secondary">설정(준비중)</span></li>
+      </ul>
+
+      <hr class="opacity-25">
+      <!-- ★ 오버레이 토글(체크박스) 추가 -->
+      <div class="mb-2">지도 오버레이</div>
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="ovlTraffic">
+        <label class="form-check-label" for="ovlTraffic">교통정보</label>
+      </div>
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="ovlRoadview">
+        <label class="form-check-label" for="ovlRoadview">로드뷰 도로선</label>
+      </div>
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="ovlTerrain">
+        <label class="form-check-label" for="ovlTerrain">지형정보</label>
+      </div>
+
+      <button id="btnAllOn"  class="btn btn-outline-light btn-sm mt-2">모두 켜기</button>
+      <button id="btnAllOff" class="btn btn-outline-light btn-sm mt-2">모두 끄기</button>
+
+      <hr class="opacity-25">
+      <p class="mb-0">※ 버튼/뱃지 스타일은 Bootstrap 5.3 예시 기반.</p>
+    </div>
+  </div>
+
+  <!-- 우상단 토스트 래퍼 -->
+  <div id="toastWrap" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Bootstrap JS (오프캔버스/토스트용) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    /* ====== 유틸: 토스트 ====== */
+    function showToast(msg){
+      const id = 't' + Date.now();
+      const wrap = document.getElementById('toastWrap');
+      const el = document.createElement('div');
+      el.className = 'toast align-items-center text-bg-dark border-0 mb-2';
+      el.id = id;
+      el.role = 'alert';
+      el.innerHTML = `
+        <div class="d-flex">
+          <div class="toast-body">${msg}</div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>`;
+      wrap.appendChild(el);
+      const t = new bootstrap.Toast(el, { delay: 2200 });
+      t.show();
+      el.addEventListener('hidden.bs.toast', ()=> el.remove());
+    }
+
+    /* ====== Kakao Map ====== */
+    let map, geocoder, markers=[];
+    const DAEJEON_CITY_HALL = { lat:36.3504, lng:127.3845 };
+
+    // 오버레이 상태 관리
+    const onSet = new Set();
+    const mapTypes = {
+      traffic: kakao.maps.MapTypeId.TRAFFIC,
+      roadview: kakao.maps.MapTypeId.ROADVIEW,
+      terrain: kakao.maps.MapTypeId.TERRAIN
+    };
+
+    function initMap(){
+      geocoder = new kakao.maps.services.Geocoder();
+      const fallback = new kakao.maps.LatLng(DAEJEON_CITY_HALL.lat, DAEJEON_CITY_HALL.lng);
+      map = new kakao.maps.Map(document.getElementById('map'), { center: fallback, level: 4 });
+
+      // 확대/축소 허용 + 기본 ZoomControl 추가
+      map.setZoomable(true);
+      const zoomControl = new kakao.maps.ZoomControl();
+      map.addControl(zoomControl, kakao.maps.ControlPosition.RIGHT);
+
+      // 최초 진입 시 현재 위치 표시
+      if(navigator.geolocation){
+        navigator.geolocation.getCurrentPosition(pos=>{
+          const center = new kakao.maps.LatLng(36.3504, 127.3845);
+          map.setCenter(center);
+          const me = new kakao.maps.Marker({ position:center });
+          me.setMap(map);
+        }, ()=>{}, { enableHighAccuracy:true, timeout:3000 });
+      }
+    }
+
+    function clearMarkers(){ markers.forEach(m=>m.setMap(null)); markers.length=0; }
+
+    function addMarkerByAddress(address, title){
+      geocoder.addressSearch(address, function(result, status){
+        if(status === kakao.maps.services.Status.OK){
+          const pos = new kakao.maps.LatLng(result[0].y, result[0].x);
+          const marker = new kakao.maps.Marker({ position: pos, title });//
+          marker.setMap(map);
+          markers.push(marker);
+        }
+      });
+    }
+
+    /* ====== 공공데이터 호출 ====== */
+    async function fetchMerchants({ pageNo=1, numOfRows=20, se, adstrd_nm }){  
+      const base = 'http://bigdata.daejeon.go.kr/openApi/6300000/getOtdjReqstMrhst/getOtdjReqstMrhstlist';  
+      const url = new URL(base);  
+      url.searchParams.set('pageNo', pageNo);  // 페이지 번호
+      url.searchParams.set('numOfRows', numOfRows);  // 한 페이지 결과 수
+      if(se) url.searchParams.set('se', se);  // 구(행정구) 명
+      if(adstrd_nm) url.searchParams.set('adstrd_nm', adstrd_nm);  // 동(법정동) 명
+
+      const res = await fetch(url.toString(), { headers:{ 'Accept':'application/json' }});  
+      if(!res.ok) throw new Error('HTTP '+res.status);  
+      const data = await res.json();  
+      const code = data?.response?.header?.resultCode || '';  
+      if(code && code !== 'C00'){    // 오류 코드 처리
+        if(code==='C10') throw new Error('C10 잘못된 요청 파라미터');
+        if(code==='C12') throw new Error('C12 서비스 없음/폐기');
+        throw new Error('C99 기타 오류');  
+      }
+      return data?.response?.body?.items ?? [];  // 배열 반환
+    }
+
+    /* ====== 검색 핸들러 ====== */
+    async function onSearch(e){  
+      e?.preventDefault();  // 폼 제출 기본 동작 방지
+      const se = document.getElementById('qSe').value.trim();  // 구(행정구) 명
+      const dong = document.getElementById('qDong').value.trim();  // 동(법정동) 명
+      if(!se && !dong){  // 둘 다 비었으면
+        showToast('구 또는 동을 입력해주세요. (예: 동구 / 대동)');  
+        return;
+      }
+      clearMarkers();  // 기존 마커 제거
+      showToast('조회 중…');  
+
+      try{
+        const items = await fetchMerchants({ pageNo:1, numOfRows:20, se, adstrd_nm:dong });  // 데이터 호출
+        if(!items.length){  
+          showToast('검색 결과가 없습니다.');  // 결과 없음
+          return;  
+        }
+        items.forEach(it => addMarkerByAddress(it.adres, it.mrhst_nm));  // 마커 추가
+        showToast(`가맹점 ${items.length}건 표시`);  // 성공 메시지
+      }catch(err){  // 오류 처리
+        console.error(err);  // 콘솔에 오류 기록
+        showToast('조회 오류: ' + err.message);  // 오류 메시지 표시
+      }
+    }
+
+    /* ====== 오버레이 토글 ====== */
+    function setOverlay(typeKey, on){  // 오버레이 설정
+      const typeId = mapTypes[typeKey];
+      if(!typeId) return;
+      if(on){
+        if(!onSet.has(typeKey)){  // 아직 켜지 않은 상태
+          map.addOverlayMapTypeId(typeId);
+          onSet.add(typeKey);  // 켜진 상태로 기록
+        }
+      }else{
+        if(onSet.has(typeKey)){  // 켜진 상태
+          map.removeOverlayMapTypeId(typeId);  
+          onSet.delete(typeKey);  // 꺼진 상태로 기록
+        }
+      }
+    }
+    function bindOverlayCheckbox(id, key){  // 체크박스 바인딩
+      const el = document.getElementById(id);
+      el.addEventListener('change', ()=> setOverlay(key, el.checked));
+    }
+    function allOn(){  // 체크박스 모두 선택
+      Object.keys(mapTypes).forEach(k => setOverlay(k, true));
+      ['ovlTraffic','ovlRoadview','ovlTerrain'].forEach(id=>{
+        const el = document.getElementById(id);
+        if(el) el.checked = true;
+      });
+    }
+    function allOff(){  // 체크박스 모두 해제
+      onSet.forEach(k => map.removeOverlayMapTypeId(mapTypes[k]));  
+      onSet.clear();
+      ['ovlTraffic','ovlRoadview','ovlTerrain'].forEach(id=>{
+        const el = document.getElementById(id);  
+        if(el) el.checked = false;  
+      });
+    }
+
+    /* ====== 메뉴 동작 ====== */
+    function closeOffcanvas(){  //
+      const el = document.getElementById('menuCanvas');  
+      const inst = bootstrap.Offcanvas.getOrCreateInstance(el);  
+      inst.hide();  // 오프캔버스 닫기
+    }
+    function goMyPosition(){  // 내 위치로 이동
+      if(!navigator.geolocation){ showToast('브라우저가 위치를 지원하지 않습니다.'); return; }  // 위치 지원 체크
+      navigator.geolocation.getCurrentPosition(pos=>{  // 위치 성공
+        const center = new kakao.maps.LatLng(pos.coords.latitude, pos.coords.longitude);  // 현재 위치
+        map.setCenter(center);
+        showToast('내 위치로 이동');  // 현재 위치로 이동
+      }, ()=> showToast('위치 권한을 허용해주세요.'), { enableHighAccuracy:true, timeout:3000 });  // 위치 요청
+    }
+
+    /* ====== 초기화 ====== */
+    document.addEventListener('DOMContentLoaded', ()=>{
+      initMap();
+      // 검색
+      document.getElementById('searchForm').addEventListener('submit', onSearch);
+      document.getElementById('qSe').addEventListener('keydown', (e)=>{ if(e.key==='Enter') onSearch(e) });  // 엔터키
+      document.getElementById('qDong').addEventListener('keydown', (e)=>{ if(e.key==='Enter') onSearch(e) });  // 엔터키
+      // 메뉴: 홈/내 위치
+      document.getElementById('goHome').addEventListener('click', ()=>{ map.setLevel(4); map.setCenter(new kakao.maps.LatLng(DAEJEON_CITY_HALL.lat, DAEJEON_CITY_HALL.lng)); closeOffcanvas(); });  // 홈
+      document.getElementById('goMyPos').addEventListener('click', ()=>{ goMyPosition(); closeOffcanvas(); });  // 내 위치
+
+      // ★ 오버레이 체크박스 바인딩
+      bindOverlayCheckbox('ovlTraffic', 'traffic');  // 실시간 교통
+      bindOverlayCheckbox('ovlRoadview', 'roadview');  // 로드뷰 도로선
+      bindOverlayCheckbox('ovlTerrain', 'terrain');  // 지형정보
+      document.getElementById('btnAllOn').addEventListener('click', allOn);  // 모두 켜기
+      document.getElementById('btnAllOff').addEventListener('click', allOff);  // 모두 끄기
+
+    //   // 확대/축소 커스텀 버튼
+    //   document.getElementById('btnZoomIn').addEventListener('click', ()=> map.setLevel(Math.max(1, map.getLevel()-1)));
+    //   document.getElementById('btnZoomOut').addEventListener('click', ()=> map.setLevel(map.getLevel()+1));
+    });
+  </script>
+</body>
+</html>
