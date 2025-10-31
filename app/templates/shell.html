@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}공동 가계부{% endblock %}</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="diary-header">
+        <div class="header-row">
+          <div class="logo-wrap">
+            <h1 class="app-logo">다이어리 가계부</h1>
+            <p class="logo-tag">공동 가계부를 다이어리처럼 기록하세요.</p>
+          </div>
+          <nav class="primary-nav" aria-label="주요 화면 이동">
+            <a href="{{ url_for('main.landing') }}" class="nav-link">메인</a>
+            <a href="{{ url_for('main.main_index') }}#income" class="nav-link">입금내역</a>
+            <a href="{{ url_for('main.main_index') }}#expense" class="nav-link">출금내역</a>
+            <a href="{{ url_for('main.admin_base') }}" class="nav-link">총무 홈</a>
+            <a href="{{ url_for('main.member_overview') }}" class="nav-link">멤버 페이지</a>
+          </nav>
+          <button class="settings-toggle" type="button" aria-expanded="false" aria-controls="settings-drawer">⚙️</button>
+        </div>
+        <div class="day-index-strip" aria-label="일자 인덱스">
+          {% for number in range(1, 32) %}
+            <button type="button" class="day-index" data-day="{{ '%02d' % number }}">{{ number }}</button>
+          {% endfor %}
+        </div>
+      </header>
+
+      <div class="layout-grid">
+        <aside class="side-index" aria-label="멤버 인덱스">
+          <div class="side-index__section">
+            <h2 class="side-title">멤버</h2>
+            <p class="side-description">멤버 이름을 선택하면 개인 가계부와 인덱스 화면으로 이동합니다.</p>
+            <ul class="member-list">
+              {% for member in members %}
+                <li class="member-item {{ 'inactive' if not member.is_active }}">
+                  <div class="member-label">
+                    <span class="member-bullet">•</span>
+                    <a class="member-link" href="{{ url_for('main.member_detail', member_id=member.id) }}">{{ member.display_name() }}</a>
+                  </div>
+                  <div class="member-actions">
+                    <a class="index-button" href="{{ url_for('main.member_index', member_id=member.id) }}" title="{{ member.display_name() }} 인덱스">인덱스</a>
+                    <button type="button" class="index-button filter-button" data-member-id="{{ member.id }}" data-target="#income">입</button>
+                    <button type="button" class="index-button filter-button" data-member-id="{{ member.id }}" data-target="#expense">출</button>
+                    <form method="post" action="{{ url_for('main.toggle_member', member_id=member.id) }}" class="inline-form">
+                      <button type="submit" class="index-button" title="{{ '잠금' if member.is_active else '해제' }}">{{ '🔓' if member.is_active else '🔒' }}</button>
+                    </form>
+                  </div>
+                </li>
+              {% else %}
+                <li class="member-empty">등록된 멤버가 없습니다.</li>
+              {% endfor %}
+            </ul>
+          </div>
+        </aside>
+
+        <main class="content" id="main-content">
+          {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+              <ul class="flash-messages">
+                {% for category, message in messages %}
+                  <li class="flash {{ category }}">{{ message }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          {% endwith %}
+          {% block content %}{% endblock %}
+        </main>
+
+        <aside class="memo-column" aria-label="메모">
+          <div class="memo-header">
+            <h2>MEMO</h2>
+            <p>중요한 메모와 체크리스트를 여백에 자유롭게 기록하세요.</p>
+          </div>
+          <div class="memo-grid">
+            {% for _ in range(12) %}
+              <div class="memo-line"></div>
+            {% endfor %}
+          </div>
+        </aside>
+      </div>
+
+      <div class="settings-panel" id="settings-drawer">
+        <section class="settings-content" hidden tabindex="-1">
+          <h2>설정</h2>
+          <form class="theme-form">
+            <label>테마
+              <select name="theme">
+                <option value="light">라이트</option>
+                <option value="dark">다크</option>
+              </select>
+            </label>
+            <label>폰트 크기
+              <input type="range" name="fontSize" min="14" max="22" value="16" />
+            </label>
+          </form>
+
+          <form method="post" action="{{ url_for('main.add_member') }}" class="settings-form">
+            <h3>멤버 추가</h3>
+            <label>이름*<input type="text" name="name" required /></label>
+            <label>별명<input type="text" name="nickname" /></label>
+            <label>이메일<input type="email" name="email" /></label>
+            <label class="checkbox">
+              <input type="checkbox" name="is_admin" /> 고정지출 멤버(총무)
+            </label>
+            <button type="submit">추가</button>
+          </form>
+
+          <p class="settings-hint">설정 버튼으로 언제든 이동 가능합니다. 시스템 모드, 글꼴, 초대 이메일 전송 등을 변경하세요.</p>
+        </section>
+      </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/main.js') }}" defer></script>
+  </body>
+</html>

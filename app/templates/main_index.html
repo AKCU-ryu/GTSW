@@ -1,0 +1,148 @@
+{% extends 'shell.html' %}
+{% block title %}공동 가계부 - 메인 인덱스{% endblock %}
+
+{% block content %}
+<section class="index-hero">
+  <div>
+    <h2>{{ year }}년 {{ month }}월 메인 달력</h2>
+    <p>휴일과 일정, 입·출금 내역을 한 페이지에서 확인하세요.</p>
+  </div>
+  <form method="get" class="month-picker">
+    <label>연도<input type="number" name="year" value="{{ year }}" min="2000" max="2100" /></label>
+    <label>월<input type="number" name="month" value="{{ month }}" min="1" max="12" /></label>
+    <button type="submit">이동</button>
+  </form>
+</section>
+
+<section class="diary-calendar" id="calendar-section">
+  <header class="calendar-header">
+    {% for weekday in ['일', '월', '화', '수', '목', '금', '토'] %}
+      <div class="calendar-column">{{ weekday }}</div>
+    {% endfor %}
+  </header>
+  <div class="calendar-body">
+    {% for week in month_matrix %}
+      <div class="calendar-week">
+        {% for cell in week %}
+          <div class="calendar-cell {{ 'empty' if not cell.day }}" {% if cell.date %}data-date="{{ cell.date.isoformat() }}"{% endif %}>
+            {% if cell.day %}
+              <div class="calendar-cell__header">
+                <span class="day-number">{{ cell.day }}</span>
+                {% if holidays.get(cell.date) %}
+                  <ul class="holiday-list">
+                    {% for label in holidays[cell.date] %}
+                      <li class="holiday-badge">{{ label }}</li>
+                    {% endfor %}
+                  </ul>
+                {% endif %}
+              </div>
+              <ul class="calendar-entries">
+                {% for entry in cell.entries %}
+                  <li class="calendar-entry {{ entry.entry_type }}">
+                    <span class="entry-category">{{ entry.category }}</span>
+                    <span class="entry-amount">₩{{ '{:,.0f}'.format(entry.amount) }}</span>
+                  </li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="ledger-board">
+  <div class="ledger-column" id="income">
+    <header class="section-header">
+      <h3>입금 내역</h3>
+      <button type="button" class="action-button" data-modal-target="#entry-modal" data-entry-type="income">입금 추가</button>
+    </header>
+    <table class="ledger-table">
+      <thead>
+        <tr>
+          <th>날짜</th>
+          <th>멤버</th>
+          <th>항목</th>
+          <th>금액</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for entry in incomes %}
+          <tr {% if entry.member_id %}data-member="{{ entry.member_id }}"{% endif %}>
+            <td>{{ entry.occurred_on.strftime('%Y-%m-%d') }}</td>
+            <td>{{ entry.member.display_name() if entry.member else '전체' }}</td>
+            <td>{{ entry.category }}</td>
+            <td class="align-right">₩{{ '{:,.0f}'.format(entry.amount) }}</td>
+          </tr>
+        {% else %}
+          <tr><td colspan="4" class="empty">등록된 입금 내역이 없습니다.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="ledger-column" id="expense">
+    <header class="section-header">
+      <h3>출금 내역</h3>
+      <button type="button" class="action-button" data-modal-target="#entry-modal" data-entry-type="expense">출금 추가</button>
+    </header>
+    <table class="ledger-table">
+      <thead>
+        <tr>
+          <th>날짜</th>
+          <th>멤버</th>
+          <th>항목</th>
+          <th>금액</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for entry in expenses %}
+          <tr {% if entry.member_id %}data-member="{{ entry.member_id }}"{% endif %}>
+            <td>{{ entry.occurred_on.strftime('%Y-%m-%d') }}</td>
+            <td>{{ entry.member.display_name() if entry.member else '전체' }}</td>
+            <td>{{ entry.category }}</td>
+            <td class="align-right">₩{{ '{:,.0f}'.format(entry.amount) }}</td>
+          </tr>
+        {% else %}
+          <tr><td colspan="4" class="empty">등록된 출금 내역이 없습니다.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="summary-band">
+  <article class="summary-card">
+    <h3>총정산</h3>
+    <p>총 입금: <strong>₩{{ '{:,.0f}'.format(monthly_totals['income']) }}</strong></p>
+    <p>총 출금: <strong>₩{{ '{:,.0f}'.format(monthly_totals['expense']) }}</strong></p>
+    <p>순 잔액: <strong>₩{{ '{:,.0f}'.format(monthly_totals['net']) }}</strong></p>
+  </article>
+  <article class="summary-card">
+    <h3>멤버별 균등 분배</h3>
+    <table class="mini-table">
+      <thead>
+        <tr>
+          <th>멤버</th>
+          <th>입금</th>
+          <th>지출</th>
+          <th>잔액</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in member_balances %}
+          <tr>
+            <td>{{ row['member'].display_name() }}</td>
+            <td>₩{{ '{:,.0f}'.format(row['income']) }}</td>
+            <td>₩{{ '{:,.0f}'.format(row['expense']) }}</td>
+            <td class="align-right">₩{{ '{:,.0f}'.format(row['balance']) }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </article>
+</section>
+
+{% include 'partials/entry_modal.html' %}
+{% endblock %}

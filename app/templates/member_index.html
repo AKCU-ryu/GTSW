@@ -1,0 +1,69 @@
+{% extends 'shell.html' %}
+{% block title %}{{ member.display_name() }} 인덱스{% endblock %}
+
+{% block content %}
+<section class="member-index-hero">
+  <div>
+    <h2>{{ member.display_name() }}님 달력 인덱스</h2>
+    <p>개인 가계부를 달력 형태로 관리하고 메모를 남겨보세요.</p>
+  </div>
+  <form method="get" class="month-picker">
+    <input type="hidden" name="member_id" value="{{ member.id }}" />
+    <label>연도<input type="number" name="year" value="{{ year }}" min="2000" max="2100" /></label>
+    <label>월<input type="number" name="month" value="{{ month }}" min="1" max="12" /></label>
+    <button type="submit">이동</button>
+  </form>
+  <a class="inline-link" href="{{ url_for('main.member_detail', member_id=member.id) }}">가계부로 돌아가기</a>
+</section>
+
+<section class="diary-calendar">
+  <header class="calendar-header">
+    {% for weekday in ['일', '월', '화', '수', '목', '금', '토'] %}
+      <div class="calendar-column">{{ weekday }}</div>
+    {% endfor %}
+  </header>
+  <div class="calendar-body">
+    {% for week in month_matrix %}
+      <div class="calendar-week">
+        {% for cell in week %}
+          <div class="calendar-cell {{ 'empty' if not cell.day }}" {% if cell.date %}data-date="{{ cell.date.isoformat() }}"{% endif %}>
+            {% if cell.day %}
+              <div class="calendar-cell__header">
+                <span class="day-number">{{ cell.day }}</span>
+                {% if holidays.get(cell.date) %}
+                  <ul class="holiday-list">
+                    {% for label in holidays[cell.date] %}
+                      <li class="holiday-badge">{{ label }}</li>
+                    {% endfor %}
+                  </ul>
+                {% endif %}
+              </div>
+              <ul class="calendar-entries">
+                {% for entry in cell.entries %}
+                  <li class="calendar-entry {{ entry.entry_type }}">
+                    <span class="entry-category">{{ entry.category }}</span>
+                    <span class="entry-amount">₩{{ '{:,.0f}'.format(entry.amount) }}</span>
+                  </li>
+                {% else %}
+                  <li class="calendar-entry placeholder">메모 공간</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="member-index-settings">
+  <h3>인덱스 설정</h3>
+  <p>설정 버튼을 눌러 테마, 폰트, 멤버 초대 등을 변경할 수 있습니다.</p>
+  <div class="button-row">
+    <button type="button" class="action-button" data-modal-target="#entry-modal" data-entry-type="income">입금 추가</button>
+    <button type="button" class="action-button" data-modal-target="#entry-modal" data-entry-type="expense">출금 추가</button>
+  </div>
+</section>
+
+{% include 'partials/entry_modal.html' %}
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends 'shell.html' %}
+{% block title %}공동 가계부 - 메인{% endblock %}
+
+{% block content %}
+<section class="cover-motion">
+  <div class="cover-illustration">
+    <h2>우리 모임의 가계부를 다이어리처럼.</h2>
+    <p>핸드폰 촬영 영수증 자동 인식, 멤버 초대, 일정 캘린더까지 한 번에!</p>
+  </div>
+  <div class="cover-actions">
+    <form class="auth-form" aria-label="로그인">
+      <h3>로그인</h3>
+      <label>이메일<input type="email" placeholder="you@example.com" required /></label>
+      <label>비밀번호<input type="password" placeholder="••••••" required /></label>
+      <button type="submit">로그인</button>
+      <a href="#" class="sub-link">비밀번호를 잊으셨나요?</a>
+    </form>
+    <form class="auth-form" aria-label="회원가입">
+      <h3>회원가입</h3>
+      <label>이름<input type="text" placeholder="홍길동" required /></label>
+      <label>이메일<input type="email" placeholder="you@example.com" required /></label>
+      <label>비밀번호<input type="password" placeholder="8자 이상" required /></label>
+      <button type="submit">가입하기</button>
+      <p class="form-hint">초대 이메일을 받은 경우 해당 계정으로 가입하세요.</p>
+    </form>
+  </div>
+</section>
+<section class="quick-links">
+  <a class="quick-card" href="{{ url_for('main.admin_base') }}">총무 페이지 이동</a>
+  <a class="quick-card" href="{{ url_for('main.main_index') }}">메인 달력 보기</a>
+  <a class="quick-card" href="{{ url_for('main.member_overview') }}">멤버별 가계부 보기</a>
+</section>
+{% endblock %}
